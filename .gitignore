@@ -1,0 +1,22 @@
+# Build artifacts
+build/
+.vs/
+out/
+
+# Node/Electron
+desktop/node_modules/
+desktop/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+data/
+
+# OS/editor
+Thumbs.db
+*.user
+*.suo
+*.VC.db
+*.log
+

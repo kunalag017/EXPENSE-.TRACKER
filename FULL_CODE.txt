@@ -1,0 +1,4211 @@
+
+====================================================================================================
+FILE: web/index.html
+====================================================================================================
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker (College Edition)</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">ET</div>
+          <div>
+            <div class="title">Expense Tracker</div>
+            <div class="subtitle">College Edition · Analytics + AI Suggestions</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div id="userBadge" class="badge hidden"></div>
+          <button id="logoutBtn" class="btn btn-ghost hidden" type="button">Logout</button>
+        </div>
+      </header>
+
+      <main class="shell">
+        <aside class="sidebar">
+          <nav class="nav">
+            <button class="nav-item active" data-route="home">
+              <span class="nav-icon">🏠</span><span>Home</span>
+            </button>
+            <button class="nav-item" data-route="add">
+              <span class="nav-icon">➕</span><span>Add Expense</span>
+            </button>
+            <button class="nav-item" data-route="reports">
+              <span class="nav-icon">📊</span><span>Reports</span>
+            </button>
+            <button class="nav-item" data-route="ai">
+              <span class="nav-icon">🤖</span><span>AI Suggestions</span>
+            </button>
+            <button id="bankBtn" class="nav-item" type="button">
+              <span class="nav-icon">🏦</span><span>Connect Bank</span>
+            </button>
+          </nav>
+          <div class="sidebar-footer">
+            <div class="hint">
+              Data is stored locally in your browser (per user).
+            </div>
+          </div>
+        </aside>
+
+        <section class="content">
+          <!-- AUTH -->
+          <section id="authView" class="view">
+            <div class="card auth-card">
+              <h2 id="authTitle">Login</h2>
+              <p class="muted">Create an account to keep your transactions separate.</p>
+              <div class="grid">
+                <label>
+                  <span>Username</span>
+                  <input id="authUsername" type="text" placeholder="e.g. rahul_07" />
+                </label>
+                <label>
+                  <span>Password</span>
+                  <input id="authPassword" type="password" placeholder="min 4 characters" />
+                </label>
+              </div>
+              <div id="authError" class="error hidden"></div>
+              <div class="row">
+                <button id="authSubmit" class="btn btn-primary" type="button">Login</button>
+                <button id="authToggle" class="btn btn-ghost" type="button">New here? Register</button>
+              </div>
+              <div class="small muted">
+                Credentials are stored in browser storage (demo mode). For a real multi-device website,
+                add a backend API.
+              </div>
+            </div>
+          </section>
+
+          <!-- HOME -->
+          <section id="homeView" class="view home-theme hidden">
+            <div class="home-glow" aria-hidden="true"></div>
+            <div class="row between">
+              <h2>Dashboard</h2>
+              <div class="muted small">Tip: Add expenses daily to get better forecasts.</div>
+            </div>
+
+            <div class="card" style="margin-top: 14px;">
+              <div class="row between" style="margin-top: 0;">
+                <div class="card-title">Quick Add Expense</div>
+                <button id="goToAddPage" class="btn btn-ghost small" type="button">Open full form</button>
+              </div>
+              <div class="grid-2">
+                <label>
+                  <span>Type</span>
+                  <div class="seg">
+                    <button id="qTypeIncome" class="seg-btn" type="button">Income</button>
+                    <button id="qTypeExpense" class="seg-btn active" type="button">Expense</button>
+                  </div>
+                </label>
+                <label>
+                  <span>Date</span>
+                  <input id="qDate" type="date" />
+                </label>
+                <label>
+                  <span>Amount (₹)</span>
+                  <input id="qAmount" type="number" min="0" step="0.01" placeholder="e.g. 120" />
+                </label>
+                <label>
+                  <span>Category</span>
+                  <input id="qCategory" type="text" placeholder="Food, Rent, Travel, Books..." />
+                </label>
+                <label class="span-2">
+                  <span>Note</span>
+                  <input id="qNote" type="text" placeholder="Optional" />
+                </label>
+              </div>
+              <div id="qError" class="error hidden"></div>
+              <div class="row">
+                <button id="qAddSubmit" class="btn btn-primary" type="button">Add</button>
+                <button id="qClear" class="btn btn-ghost" type="button">Clear</button>
+              </div>
+            </div>
+
+            <div class="row between" style="margin-top: 10px;">
+              <div class="muted small">Salary summary</div>
+              <div class="row" style="margin-top: 0; flex-wrap: wrap; justify-content: flex-end;">
+                <label style="display:flex; align-items:center; gap:8px;">
+                  <span class="muted small">Salary category</span>
+                  <input id="salaryCategory" type="text" style="width:160px;" placeholder="Salary" />
+                </label>
+                <button id="saveSalaryCategory" class="btn btn-ghost small" type="button">Save</button>
+                <label style="display:flex; align-items:center; gap:8px;">
+                  <span class="muted small">Recurring amount</span>
+                  <input id="salaryRecurringAmount" type="number" min="0" step="0.01" style="width:140px;" placeholder="e.g. 25000" />
+                </label>
+                <label style="display:flex; align-items:center; gap:8px;">
+                  <span class="muted small">Payout day</span>
+                  <input id="salaryRecurringDay" type="number" min="1" max="28" style="width:80px;" placeholder="1" />
+                </label>
+                <button id="saveRecurringSalary" class="btn btn-primary small" type="button">Set recurring salary</button>
+              </div>
+            </div>
+            <div id="salaryRecurringMsg" class="muted small" style="margin-top: 6px;"></div>
+
+            <div class="cards">
+              <div class="card stat">
+                <div class="stat-label green">Total Income</div>
+                <div id="statIncome" class="stat-value green">₹0</div>
+              </div>
+              <div class="card stat">
+                <div class="stat-label red">Total Expense</div>
+                <div id="statExpense" class="stat-value red">₹0</div>
+              </div>
+              <div class="card stat">
+                <div class="stat-label blue">Net Balance</div>
+                <div id="statBalance" class="stat-value">₹0</div>
+              </div>
+              <div class="card stat">
+                <div class="stat-label amber">Highest Spend</div>
+                <div id="statHighest" class="stat-value">—</div>
+              </div>
+              <div class="card stat">
+                <div class="stat-label blue">Salary (only)</div>
+                <div id="statSalary" class="stat-value">₹0</div>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-title">Category Distribution (Pie)</div>
+                <canvas id="pieCategories" width="400" height="220"></canvas>
+                <div id="pieCategoriesLegend" class="legend"></div>
+              </div>
+              <div class="card">
+                <div class="card-title">Income vs Expense (Pie)</div>
+                <canvas id="pieIncomeExpense" width="400" height="220"></canvas>
+                <div id="pieIncomeExpenseLegend" class="legend"></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="row between">
+                <div class="card-title">Recent Transactions</div>
+                <div class="muted small">Delete from the right</div>
+              </div>
+              <div class="table-wrap">
+                <table class="table tx-table" aria-label="Transactions">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Type</th>
+                      <th>Category</th>
+                      <th class="right">Amount</th>
+                      <th>Note</th>
+                      <th class="right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="txTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ADD -->
+          <section id="addView" class="view hidden">
+            <h2>Add Transaction</h2>
+            <div class="card">
+              <div class="grid-2">
+                <label>
+                  <span>Type</span>
+                  <div class="seg">
+                    <button id="typeIncome" class="seg-btn" type="button">Income</button>
+                    <button id="typeExpense" class="seg-btn active" type="button">Expense</button>
+                  </div>
+                </label>
+                <label>
+                  <span>Date</span>
+                  <input id="txDate" type="date" />
+                </label>
+                <label>
+                  <span>Amount (₹)</span>
+                  <input id="txAmount" type="number" min="0" step="0.01" placeholder="e.g. 120" />
+                </label>
+                <label>
+                  <span>Category</span>
+                  <input id="txCategory" type="text" placeholder="Food, Rent, Travel, Books..." />
+                </label>
+                <label class="span-2">
+                  <span>Note</span>
+                  <input id="txNote" type="text" placeholder="Optional" />
+                </label>
+              </div>
+              <div id="addError" class="error hidden"></div>
+              <div class="row">
+                <button id="addSubmit" class="btn btn-primary" type="button">Add</button>
+                <button id="addClear" class="btn btn-ghost" type="button">Clear</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- REPORTS -->
+          <section id="reportsView" class="view hidden">
+            <div class="row between" style="margin-top: 0;">
+              <h2>Reports</h2>
+              <div class="muted small">Compare your latest periods and spot overspending quickly.</div>
+            </div>
+            <div class="grid-3">
+              <div class="card">
+                <div class="card-title">Weekly Comparison</div>
+                <div id="weeklyCmp" class="report"></div>
+              </div>
+              <div class="card">
+                <div class="card-title">Monthly Comparison</div>
+                <div id="monthlyCmp" class="report"></div>
+              </div>
+              <div class="card">
+                <div class="card-title">Yearly Comparison</div>
+                <div id="yearlyCmp" class="report"></div>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-title">Weekly Expenses (Bar)</div>
+                <canvas id="barWeekly" width="500" height="260"></canvas>
+              </div>
+              <div class="card">
+                <div class="card-title">Monthly Expenses (Bar)</div>
+                <canvas id="barMonthly" width="500" height="260"></canvas>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 14px;">
+              <div class="row between" style="margin-top: 0;">
+                <div class="card-title">Last Periods (Quick Table)</div>
+                <div class="muted small">Shows totals by period (income/expense/net)</div>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <div class="muted small" style="margin-bottom: 8px;">Weekly (last 6)</div>
+                  <div class="table-wrap">
+                    <table class="table" aria-label="Weekly totals">
+                      <thead>
+                        <tr>
+                          <th>Week</th>
+                          <th class="right">Income</th>
+                          <th class="right">Expense</th>
+                          <th class="right">Net</th>
+                        </tr>
+                      </thead>
+                      <tbody id="weeklyTotalsBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div>
+                  <div class="muted small" style="margin-bottom: 8px;">Monthly (last 6)</div>
+                  <div class="table-wrap">
+                    <table class="table" aria-label="Monthly totals">
+                      <thead>
+                        <tr>
+                          <th>Month</th>
+                          <th class="right">Income</th>
+                          <th class="right">Expense</th>
+                          <th class="right">Net</th>
+                        </tr>
+                      </thead>
+                      <tbody id="monthlyTotalsBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- AI -->
+          <section id="aiView" class="view hidden">
+            <div class="row between">
+              <h2>AI Suggestions</h2>
+              <button id="aiRefresh" class="btn btn-ghost" type="button">Refresh</button>
+            </div>
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-title amber">Alerts</div>
+                <ul id="aiAlerts" class="list"></ul>
+              </div>
+              <div class="card">
+                <div class="card-title green">Suggestions</div>
+                <ul id="aiSuggestions" class="list"></ul>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title blue">Predictions</div>
+              <div id="aiForecast" class="forecast"></div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <!-- BANK MODAL -->
+    <div id="bankModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Connect bank account">
+      <div class="modal-backdrop" id="bankCloseBackdrop"></div>
+      <div class="modal-card">
+        <div class="row between" style="margin-top:0;">
+          <div>
+            <div class="card-title">Connect Bank Account</div>
+            <div class="muted small">Demo mode (no real bank login). Use the demo account or import bank details.</div>
+          </div>
+          <div class="row" style="margin-top:0;">
+            <button id="bankDetailsToggle" class="btn btn-ghost" type="button">Import details</button>
+            <button id="bankCloseX" class="btn btn-ghost" type="button">Close</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <div class="row between" style="margin-top:0;">
+            <div>
+              <div class="muted small">Status</div>
+              <div id="bankStatus" style="font-weight:800;">Not connected</div>
+            </div>
+            <div class="row" style="margin-top:0;">
+              <button id="bankDisconnect" class="btn btn-ghost" type="button">Disconnect</button>
+            </div>
+          </div>
+          <div id="bankMsg" class="muted small" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="grid-2" style="margin-top:12px;">
+          <div class="card">
+            <div class="card-title">Connect a Bank</div>
+            <div class="muted small" style="line-height:1.6;">
+              Choose your bank. For true live sync/login, a backend + Account Aggregator/Bank API is required.
+              For now, you can still import statements/transactions below.
+            </div>
+            <div class="bank-grid" role="list">
+              <button class="bank-tile bank-choice" role="listitem" data-bank="HDFC" type="button">
+                <img class="bank-logo" src="./assets/hdfc.webp" alt="HDFC Bank" />
+                <span class="bank-name">HDFC</span>
+              </button>
+              <button class="bank-tile bank-choice" role="listitem" data-bank="ICICI" type="button">
+                <img class="bank-logo" src="./assets/icici.webp" alt="ICICI Bank" />
+                <span class="bank-name">ICICI</span>
+              </button>
+              <button class="bank-tile bank-choice" role="listitem" data-bank="Axis" type="button">
+                <img class="bank-logo" src="./assets/axis.webp" alt="Axis Bank" />
+                <span class="bank-name">Axis</span>
+              </button>
+              <button class="bank-tile bank-choice" role="listitem" data-bank="YES Bank" type="button">
+                <img class="bank-logo" src="./assets/yesbank.png" alt="YES Bank" />
+                <span class="bank-name">YES Bank</span>
+              </button>
+            </div>
+            <div class="row">
+              <button id="bankConnectReal" class="btn btn-primary" type="button">Connect selected bank</button>
+            </div>
+            <div class="small muted" style="margin-top:8px;">
+              Live sync placeholder: stores selected bank for this user.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Connection info</div>
+            <div class="muted small" style="line-height:1.6;">
+              After connecting, you can import transactions (CSV) below to populate your dashboard.
+              For real bank sync, this UI would redirect to a secure consent/login page.
+            </div>
+          </div>
+        </div>
+
+        <div id="bankDetailsPanel" class="bank-details-panel hidden">
+          <div class="row between" style="margin-top:0;">
+            <div class="card-title">Import bank account details</div>
+            <button id="bankDetailsClose" class="btn btn-ghost" type="button">Close</button>
+          </div>
+          <div class="muted small" style="line-height:1.6; margin-top: 6px;">
+            Upload JSON or CSV to store bank details (display only).<br />
+            JSON example:
+            <span class="mono">{"bank_name":"SBI","account_holder":"Name","account_last4":"7788","ifsc":"SBIN0000123"}</span>
+          </div>
+          <div class="row" style="margin-top: 10px;">
+            <input id="bankDetailsFile" type="file" accept=".json,.csv,application/json,text/csv" />
+            <button id="bankDetailsImport" class="btn btn-primary" type="button">Import</button>
+          </div>
+          <div id="bankDetailsError" class="error hidden"></div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <div class="card-title">Import Bank Transactions (CSV)</div>
+          <div class="muted small" style="line-height:1.5;">
+            CSV columns supported:
+            <b>date</b> (YYYY-MM-DD), <b>description</b>, <b>amount</b> (negative = expense, positive = income).
+            Example: <span class="mono">2026-04-01,Swiggy,-220</span>
+          </div>
+          <div class="row">
+            <input id="bankCsv" type="file" accept=".csv,text/csv" />
+            <button id="bankImport" class="btn btn-primary" type="button">Import</button>
+            <button id="bankSimulate" class="btn btn-ghost" type="button">Simulate last 30 days</button>
+          </div>
+          <div id="bankImportError" class="error hidden"></div>
+        </div>
+
+        <div class="small muted" style="margin-top:10px;">
+          Want real bank connectivity? That requires a backend + provider (Plaid/TrueLayer) and OAuth flows.
+        </div>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+
+
+
+====================================================================================================
+FILE: web/styles.css
+====================================================================================================
+
+:root{
+  --bg: #ffffff;
+  --panel: #11131a;
+  --panel2: #141827;
+  --text: rgba(15, 16, 20, 0.92);
+  --muted: rgba(30, 35, 50, 0.62);
+  --border: rgba(0,0,0,0.08);
+  --green: #3cc878;
+  --red: #dc4646;
+  --blue: #7a93ff;
+  --amber: #dcb43c;
+  --shadow: 0 12px 40px rgba(0,0,0,0.35);
+  --accentA: #8d7bff; /* violet */
+  --accentB: #4fa8ff; /* sky blue */
+  --accentC: #ff6fb7; /* soft pink */
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  background: linear-gradient(135deg, #d9ecff 0%, #bfe3ff 35%, #9fd2ff 70%, #87c6ff 100%);
+  color: var(--text);
+}
+
+.hidden{display:none !important}
+.muted{color:var(--muted)}
+.small{font-size: 12.5px}
+.right{text-align:right}
+
+.topbar{
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+}
+.brand{display:flex; gap:12px; align-items:center}
+.logo{
+  width:42px; height:42px; border-radius:12px;
+  background: linear-gradient(135deg, rgba(122,147,255,0.9), rgba(60,200,120,0.85));
+  display:grid; place-items:center;
+  font-weight:800; letter-spacing:0.3px;
+}
+.title{font-weight:800}
+.subtitle{font-size:12px; color:var(--muted)}
+.topbar-right{display:flex; align-items:center; gap:12px}
+.badge{
+  padding:8px 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.75);
+  border-radius: 12px;
+  color: var(--muted);
+}
+
+.shell{
+  height: calc(100vh - 72px);
+  display:grid;
+  grid-template-columns: 260px 1fr;
+}
+
+.sidebar{
+  border-right: 1px solid var(--border);
+  padding: 18px 14px;
+  background: rgba(233, 245, 255, 0.92);
+  backdrop-filter: blur(10px);
+  display:flex;
+  flex-direction:column;
+}
+.nav{display:flex; flex-direction:column; gap:10px}
+.nav-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(141, 123, 255, 0.22);
+  background: #efe9ff; /* pastel lavender (different from baby blue cards) */
+  color: var(--text);
+  cursor:pointer;
+  transition: 120ms ease;
+}
+.nav-item:hover{transform: translateY(-1px); background: #e3d9ff}
+.nav-item.active{
+  background: #d9ccff;
+  border-color: rgba(141, 123, 255, 0.45);
+}
+.nav-icon{width:22px; display:inline-flex; justify-content:center}
+.sidebar-footer{margin-top:auto; padding: 12px 6px}
+.hint{font-size:12px; color: var(--muted); line-height:1.4}
+
+.content{
+  padding: 22px;
+  overflow:auto;
+  position: relative;
+  border-left: 1px solid rgba(255,255,255,0.35);
+  background:
+    radial-gradient(circle at 52% 40%,
+      rgba(255, 105, 180, 0.34) 0%,
+      rgba(156, 120, 255, 0.30) 18%,
+      rgba(80, 130, 255, 0.26) 34%,
+      rgba(110, 230, 235, 0.24) 52%,
+      rgba(255,255,255,0.18) 72%),
+    linear-gradient(135deg, rgba(217,236,255,0.92) 0%, rgba(191,227,255,0.90) 35%, rgba(159,210,255,0.90) 70%, rgba(135,198,255,0.90) 100%);
+}
+
+.view{max-width: 1100px}
+
+.home-theme{
+  position: relative;
+  isolation: isolate;
+  padding: 14px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: rgba(245, 246, 248, 0.96);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.home-glow{
+  position:absolute;
+  inset:-140px -140px auto -140px;
+  height: 720px;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 50% 58%,
+      rgba(255, 105, 180, 0.65) 0%,
+      rgba(156, 120, 255, 0.60) 18%,
+      rgba(80, 130, 255, 0.55) 34%,
+      rgba(110, 230, 235, 0.50) 52%,
+      rgba(245, 246, 248, 0.0) 72%);
+  filter: blur(0.2px);
+}
+.home-theme h2{color: rgba(15, 16, 20, 0.92)}
+.home-theme .muted{color: rgba(30, 35, 50, 0.62)}
+
+.card{
+  background: #bfe3ff; /* solid baby blue */
+  border: 1px solid rgba(79, 168, 255, 0.45);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 12px 34px rgba(79,168,255,0.16);
+}
+.card-title{font-weight:700; margin-bottom:10px}
+
+.auth-card{max-width:520px; margin: 70px auto}
+.grid{display:grid; gap:12px}
+.grid-2{display:grid; gap:14px; grid-template-columns: 1fr 1fr}
+.grid-2 > *{min-width: 0}
+.grid-3{display:grid; gap:14px; grid-template-columns: 1fr 1fr 1fr}
+.span-2{grid-column: span 2}
+
+label{display:grid; gap:6px}
+input{
+  width:100%;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(255,255,255,0.85);
+  color: var(--text);
+  outline:none;
+}
+input:focus{
+  border-color: rgba(122,147,255,0.55);
+  box-shadow: 0 0 0 3px rgba(122,147,255,0.15);
+}
+
+.row{display:flex; gap:10px; align-items:center; margin-top: 12px}
+.between{justify-content:space-between}
+
+.btn{
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(79, 168, 255, 0.45);
+  background: #bfe3ff; /* baby blue */
+  color: rgba(15, 16, 20, 0.92);
+  cursor:pointer;
+  transition: 120ms ease;
+}
+.btn:hover{
+  transform: translateY(-1px);
+  background: #a9d8ff;
+  border-color: rgba(79, 168, 255, 0.70);
+}
+.btn-primary{
+  background: #93cfff; /* slightly deeper baby blue */
+  border-color: rgba(79, 168, 255, 0.85);
+  box-shadow: 0 10px 26px rgba(79,168,255,0.22);
+}
+.btn-primary:hover{
+  background: #7dc3ff;
+}
+.btn-ghost{
+  background: #bfe3ff;
+}
+
+.error{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(220,70,70,0.35);
+  background: rgba(220,70,70,0.10);
+  color: #ffd7d7;
+}
+
+.cards{display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0}
+.stat{padding:14px}
+.stat-label{font-size:12px; color: var(--muted); margin-bottom: 8px}
+.stat-value{font-size: 22px; font-weight:800}
+.green{color: var(--green)}
+.red{color: var(--red)}
+.blue{color: var(--blue)}
+.amber{color: var(--amber)}
+
+.table-wrap{overflow:auto; border-radius: 14px; border: 1px solid var(--border)}
+.table{
+  width:100%;
+  border-collapse: collapse;
+  background: rgba(255,255,255,0.75);
+}
+.table.tx-table{min-width: 820px;}
+.table th, .table td{
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.table th{font-size:12px; color: var(--muted); text-align:left}
+.pill{
+  display:inline-flex; align-items:center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  font-size:12px;
+}
+.pill.income{color: var(--green)}
+.pill.expense{color: var(--red)}
+
+.seg{display:flex; gap:8px}
+.seg-btn{
+  flex:1;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  cursor:pointer;
+}
+.seg-btn.active{
+  background: rgba(141, 123, 255, 0.22);
+  border-color: rgba(141, 123, 255, 0.45);
+}
+
+/* Light Home surface overrides (buttons should match the glow background) */
+.home-theme .btn{
+  border-color: rgba(79, 168, 255, 0.45);
+  background: #bfe3ff;
+  color: rgba(15, 16, 20, 0.92);
+}
+.home-theme .btn:hover{
+  background: #a9d8ff;
+  border-color: rgba(79, 168, 255, 0.70);
+}
+.home-theme .btn-ghost{
+  background: #bfe3ff;
+}
+.home-theme .btn-primary{
+  color: rgba(15, 16, 20, 0.92);
+  border-color: rgba(79, 168, 255, 0.85);
+  box-shadow: 0 10px 26px rgba(79,168,255,0.18);
+}
+
+.legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px 10px;
+  margin-top: 10px;
+}
+.legend-item{
+  display:flex; align-items:center; gap:8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.dot{
+  width:10px; height:10px; border-radius: 999px;
+  background: white;
+}
+
+.list{margin:0; padding-left: 18px}
+.list li{margin: 8px 0; color: var(--muted)}
+.forecast{color: var(--muted); line-height: 1.6}
+.report{color: var(--muted); line-height: 1.55}
+.report-grid{display:grid; gap:8px}
+.report-row{display:flex; justify-content:space-between; gap:12px}
+.report-key{color: var(--muted)}
+.report-val{color: var(--text); font-weight:700}
+.badge-mini{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  font-size: 12px;
+}
+.badge-mini.good{color: var(--green)}
+.badge-mini.bad{color: var(--red)}
+.badge-mini.neutral{color: var(--blue)}
+
+canvas{
+  width:100%;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.modal{
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+.modal-backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+}
+.modal-card{
+  position: relative;
+  width: min(820px, calc(100vw - 22px));
+  max-height: calc(100vh - 22px);
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(20,24,39,0.92), rgba(17,19,26,0.92));
+  box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+  padding: 16px;
+}
+
+.bank-grid{
+  margin-top: 10px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.bank-tile{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  cursor: pointer;
+  transition: 120ms ease;
+}
+.bank-tile:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.06);
+}
+.bank-tile.active{
+  background: rgba(141, 123, 255, 0.20);
+  border-color: rgba(141, 123, 255, 0.40);
+}
+.bank-logo{
+  width: 46px;
+  height: 28px;
+  object-fit: contain;
+  background: rgba(255,255,255,0.92);
+  border-radius: 10px;
+  padding: 4px;
+}
+.bank-name{font-weight:800; letter-spacing:0.2px}
+
+.bank-details-panel{
+  position: sticky;
+  bottom: 12px;
+  margin-top: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.22);
+  padding: 12px;
+}
+
+@media (max-width: 980px){
+  .shell{grid-template-columns: 220px 1fr}
+  .sidebar{display:flex}
+  .cards{grid-template-columns: 1fr 1fr}
+  .grid-2{grid-template-columns: 1fr}
+  .grid-3{grid-template-columns: 1fr}
+}
+
+
+
+====================================================================================================
+FILE: web/app.js
+====================================================================================================
+
+/* Expense Tracker Website (College Edition)
+   - OOP structure in JS (User/Auth, Transaction, ExpenseTracker, Analytics, AIAdvisor)
+   - Persistent storage per-user in localStorage
+   - Charts: simple canvas pie + bar charts (no external libs)
+*/
+
+class Storage {
+  static keyUsers() { return "et_users_v1"; }
+  static keySession() { return "et_session_v1"; }
+  static keyTx(username) { return `et_txs_v1_${username}`; }
+  static keyBank(username) { return `et_bank_v1_${username}`; }
+
+  static loadUsers() {
+    try { return JSON.parse(localStorage.getItem(Storage.keyUsers()) || "[]"); }
+    catch { return []; }
+  }
+  static saveUsers(users) {
+    localStorage.setItem(Storage.keyUsers(), JSON.stringify(users));
+  }
+  static loadTx(username) {
+    try { return JSON.parse(localStorage.getItem(Storage.keyTx(username)) || "[]"); }
+    catch { return []; }
+  }
+  static saveTx(username, txs) {
+    localStorage.setItem(Storage.keyTx(username), JSON.stringify(txs));
+  }
+  static loadSession() {
+    try { return JSON.parse(localStorage.getItem(Storage.keySession()) || "null"); }
+    catch { return null; }
+  }
+  static saveSession(sess) {
+    localStorage.setItem(Storage.keySession(), JSON.stringify(sess));
+  }
+  static clearSession() {
+    localStorage.removeItem(Storage.keySession());
+  }
+
+  static loadBank(username) {
+    try { return JSON.parse(localStorage.getItem(Storage.keyBank(username)) || "null"); }
+    catch { return null; }
+  }
+  static saveBank(username, bankObj) {
+    localStorage.setItem(Storage.keyBank(username), JSON.stringify(bankObj));
+  }
+  static clearBank(username) {
+    localStorage.removeItem(Storage.keyBank(username));
+  }
+}
+
+class User {
+  static isValidUsername(u) {
+    const s = (u || "").trim();
+    if (s.length < 3 || s.length > 20) return false;
+    return /^[a-zA-Z0-9_-]+$/.test(s);
+  }
+  static isValidPassword(p) {
+    return (p || "").length >= 4;
+  }
+  static hash(username, password) {
+    // Demo hash (not secure). Good enough for offline browser demo.
+    const str = `${username}|${password}|expense-tracker-salt-v1`;
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0).toString(16);
+  }
+
+  static register(username, password) {
+    const u = (username || "").trim();
+    if (!User.isValidUsername(u)) return { ok:false, error:"Username must be 3-20 chars: letters/numbers/_/- only." };
+    if (!User.isValidPassword(password)) return { ok:false, error:"Password must be at least 4 characters." };
+    const users = Storage.loadUsers();
+    if (users.some(x => x.username === u)) return { ok:false, error:"Username already exists." };
+    users.push({ username: u, password_hash: User.hash(u, password) });
+    Storage.saveUsers(users);
+    return { ok:true };
+  }
+
+  static login(username, password) {
+    const u = (username || "").trim();
+    const users = Storage.loadUsers();
+    const found = users.find(x => x.username === u);
+    if (!found) return { ok:false, error:"User not found. Please register." };
+    if (found.password_hash !== User.hash(u, password)) return { ok:false, error:"Incorrect password." };
+    Storage.saveSession({ username: u });
+    return { ok:true };
+  }
+}
+
+class Transaction {
+  constructor({ id, type, amount, category, date, note }) {
+    this.id = id;
+    this.type = type; // "income" | "expense"
+    this.amount = amount;
+    this.category = category;
+    this.date = date; // "YYYY-MM-DD"
+    this.note = note || "";
+  }
+  static todayISO() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+}
+
+class ExpenseTracker {
+  constructor(username) {
+    this.username = username;
+    this.txs = Storage.loadTx(username).map(x => new Transaction(x));
+    this._idCounter = 0;
+  }
+  save() { Storage.saveTx(this.username, this.txs); }
+  nextId() { return `${Date.now()}-${++this._idCounter}`; }
+
+  add({ type, amount, category, date, note }) {
+    const t = new Transaction({
+      id: this.nextId(),
+      type,
+      amount,
+      category,
+      date,
+      note
+    });
+    this.txs.push(t);
+    return t;
+  }
+  deleteById(id) {
+    const before = this.txs.length;
+    this.txs = this.txs.filter(t => t.id !== id);
+    return this.txs.length !== before;
+  }
+
+  summary() {
+    let income = 0, expense = 0;
+    for (const t of this.txs) {
+      if (t.type === "income") income += t.amount;
+      else expense += t.amount;
+    }
+    return { income, expense, balance: income - expense };
+  }
+  expenseByCategory() {
+    const m = new Map();
+    for (const t of this.txs) {
+      if (t.type !== "expense") continue;
+      m.set(t.category, (m.get(t.category) || 0) + t.amount);
+    }
+    return m;
+  }
+  highestSpendingCategory() {
+    const m = this.expenseByCategory();
+    let best = null;
+    for (const [cat, amt] of m.entries()) {
+      if (!best || amt > best.amount) best = { category: cat, amount: amt };
+    }
+    return best;
+  }
+}
+
+class Analytics {
+  static periodLabel(dateISO, period) {
+    const d = new Date(`${dateISO}T12:00:00`);
+    const y = d.getFullYear();
+    const pad = (n) => String(n).padStart(2, "0");
+    if (period === "year") return `${y}`;
+    if (period === "month") return `${y}-${pad(d.getMonth()+1)}`;
+    // week bucket (Mon-start, simple)
+    const day = d.getDay(); // 0 Sun..6 Sat
+    const mondayOffset = (day + 6) % 7;
+    d.setDate(d.getDate() - mondayOffset);
+    const weekYear = d.getFullYear();
+    const start = new Date(weekYear, 0, 1);
+    const diffDays = Math.floor((d - start) / (24*3600*1000));
+    const weekNum = Math.floor(diffDays / 7) + 1;
+    return `${weekYear}-W${pad(weekNum)}`;
+  }
+
+  static totalsByPeriod(txs, period) {
+    const buckets = new Map();
+    for (const t of txs) {
+      const label = Analytics.periodLabel(t.date, period);
+      if (!buckets.has(label)) buckets.set(label, { label, income:0, expense:0, net:0 });
+      const b = buckets.get(label);
+      if (t.type === "income") b.income += t.amount;
+      else b.expense += t.amount;
+    }
+    const out = [...buckets.values()].sort((a,b) => a.label.localeCompare(b.label));
+    for (const x of out) x.net = x.income - x.expense;
+    return out;
+  }
+
+  static compareLatestTwo(txs, period) {
+    const totals = Analytics.totalsByPeriod(txs, period);
+    if (totals.length < 2) return null;
+    const prev = totals[totals.length - 2];
+    const cur = totals[totals.length - 1];
+    const delta = cur.expense - prev.expense;
+    const pct = prev.expense > 0 ? (delta / prev.expense) * 100 : 0;
+    return {
+      current: cur,
+      previous: prev,
+      delta_expense: delta,
+      percent_change: pct,
+      money_saved: delta < 0 ? -delta : 0,
+      extra_spending: delta > 0 ? delta : 0
+    };
+  }
+}
+
+class AIAdvisor {
+  static money(v) {
+    return `₹${Math.round(v).toLocaleString("en-IN")}`;
+  }
+  static analyze(tracker) {
+    const out = { alerts: [], suggestions: [], forecast: { next_week: 0, next_month: 0 } };
+    const sum = tracker.summary();
+    const hi = tracker.highestSpendingCategory();
+
+    if (hi && sum.expense > 0) {
+      const pct = (hi.amount / sum.expense) * 100;
+      if (pct >= 30) out.alerts.push(`Reduce ${hi.category} spending by 20% (it is ~${pct.toFixed(0)}% of your expenses).`);
+    }
+
+    if (sum.income > 0 && sum.expense > 0) {
+      const savingsRate = (sum.income - sum.expense) / sum.income;
+      if (savingsRate < 0.10) out.suggestions.push("Try a student rule: save at least 10% of income first.");
+      else if (savingsRate > 0.25) out.suggestions.push("Nice! You're saving >25%. Consider investing part of the surplus.");
+    }
+
+    const cmpW = Analytics.compareLatestTwo(tracker.txs, "week");
+    if (cmpW) {
+      if (cmpW.money_saved > 0) out.alerts.push(`You saved ${AIAdvisor.money(cmpW.money_saved)} this week.`);
+      else if (cmpW.extra_spending > 0) out.alerts.push(`You spent ${AIAdvisor.money(cmpW.extra_spending)} extra this week (${Math.abs(cmpW.percent_change).toFixed(0)}% increase).`);
+    }
+
+    const cmpM = Analytics.compareLatestTwo(tracker.txs, "month");
+    if (cmpM && cmpM.extra_spending > 0 && Math.abs(cmpM.percent_change) >= 15) {
+      out.alerts.push("Monthly spending jumped. Review your top categories and set limits.");
+    }
+
+    // Forecast: moving average
+    const weeks = Analytics.totalsByPeriod(tracker.txs, "week");
+    if (weeks.length) {
+      const last = weeks.slice(-4);
+      out.forecast.next_week = last.reduce((a,b) => a + b.expense, 0) / last.length;
+    }
+    const months = Analytics.totalsByPeriod(tracker.txs, "month");
+    if (months.length) {
+      const last = months.slice(-3);
+      out.forecast.next_month = last.reduce((a,b) => a + b.expense, 0) / last.length;
+    }
+
+    // Practical saving suggestions
+    const byCat = tracker.expenseByCategory();
+    const top = [...byCat.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4);
+
+    // If spending exceeds income, give an immediate "stop the bleed" plan.
+    if (sum.income > 0 && sum.expense > sum.income) {
+      const gap = sum.expense - sum.income;
+      out.alerts.push(`You're overspending by ${AIAdvisor.money(gap)} overall. Cut non-essentials and set hard weekly limits.`);
+      out.suggestions.push("Start with a 48-hour rule for non-essential purchases (wait 2 days before buying).");
+      out.suggestions.push("Use cash/envelope budgeting for Food + Entertainment for the next 2 weeks.");
+    }
+
+    // Savings goal suggestion based on last month cashflow (if possible).
+    if (months.length) {
+      const cur = months[months.length - 1];
+      if (cur.income > 0) {
+        const targetRate = 0.15; // student-friendly target
+        const target = cur.income * targetRate;
+        out.suggestions.push(`Next month goal: auto-save ~15% of income (${AIAdvisor.money(target)}) on day 1.`);
+      }
+    }
+
+    // Category reduction targets + tactical tips
+    for (const [cat, amt] of top) {
+      if (amt <= 0) continue;
+
+      const weeklyCap = amt / 4;
+      out.suggestions.push(`Set a weekly cap for ${cat}: ~${AIAdvisor.money(weeklyCap)} (based on your recent spend).`);
+
+      const reduceBy = 0.15; // default 15% cut
+      const saveAmt = amt * reduceBy;
+      out.suggestions.push(`If you cut ${cat} by 15%, you could save ~${AIAdvisor.money(saveAmt)} over a similar period.`);
+
+      const catLower = String(cat).toLowerCase();
+      if (catLower.includes("food")) {
+        out.suggestions.push("Food tip: plan 3 low-cost meals/week, carry a water bottle, and avoid daily delivery.");
+      } else if (catLower.includes("travel") || catLower.includes("transport")) {
+        out.suggestions.push("Travel tip: batch errands, use student passes, and pick off-peak travel when possible.");
+      } else if (catLower.includes("entertain") || catLower.includes("movie") || catLower.includes("fun")) {
+        out.suggestions.push("Entertainment tip: set 1 paid-outing/week; use campus events and free alternatives.");
+      } else if (catLower.includes("books") || catLower.includes("study")) {
+        out.suggestions.push("Books tip: borrow from library, buy used, or share/photocopy allowed materials.");
+      } else if (catLower.includes("rent") || catLower.includes("hostel")) {
+        out.suggestions.push("Rent tip: if rent is fixed, focus cuts on Food/Entertainment/Travel instead.");
+      } else if (catLower.includes("misc")) {
+        out.suggestions.push("Misc tip: review 'small buys' weekly—cancel repeats and remove stored card info from apps.");
+      }
+    }
+
+    // Compare last 2 months: detect a rising category and warn.
+    if (months.length >= 2) {
+      const curLabel = months[months.length - 1].label;
+      const prevLabel = months[months.length - 2].label;
+      const monthTx = (label) => tracker.txs.filter(t => Analytics.periodLabel(t.date, "month") === label && t.type === "expense");
+      const sumByCat = (arr) => {
+        const m = new Map();
+        for (const t of arr) m.set(t.category, (m.get(t.category) || 0) + t.amount);
+        return m;
+      };
+      const curMap = sumByCat(monthTx(curLabel));
+      const prevMap = sumByCat(monthTx(prevLabel));
+      let worst = null;
+      for (const [cat, curAmt] of curMap.entries()) {
+        const prevAmt = prevMap.get(cat) || 0;
+        const delta = curAmt - prevAmt;
+        if (!worst || delta > worst.delta) worst = { cat, delta, curAmt, prevAmt };
+      }
+      if (worst && worst.delta > 0) {
+        out.alerts.push(`${worst.cat} increased by ${AIAdvisor.money(worst.delta)} vs last month. Consider a tighter cap this month.`);
+      }
+    }
+
+    if (!tracker.txs.length) out.suggestions.push("Add a few expenses to unlock category charts and AI insights.");
+    if (!out.alerts.length) out.alerts.push("No alerts right now. Keep tracking regularly.");
+    return out;
+  }
+}
+
+function seedExampleUserIfMissing() {
+  // Creates a demo user with ~2 years of data (only if not already present).
+  const demoUser = "student_2yr";
+  const demoPass = "demo1234";
+
+  const users = Storage.loadUsers();
+  const exists = users.some(u => u.username === demoUser);
+  if (!exists) {
+    users.push({ username: demoUser, password_hash: User.hash(demoUser, demoPass) });
+    Storage.saveUsers(users);
+  }
+
+  const ensureSeededUser = (username, monthsBack, monthlyIncome, extraNote = "") => {
+    const existing = Storage.loadTx(username);
+    if (existing.length > 0) return;
+
+    const txs = [];
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth() - monthsBack, 1);
+    const pad = (n) => String(n).padStart(2, "0");
+    const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    const expenseCats = [
+      { cat: "Food", base: 2500, jitter: 700 },
+      { cat: "Rent", base: 3500, jitter: 0 },
+      { cat: "Travel", base: 900, jitter: 350 },
+      { cat: "Books", base: 450, jitter: 400 },
+      { cat: "Entertainment", base: 600, jitter: 500 },
+      { cat: "Bills", base: 700, jitter: 300 },
+      { cat: "Health", base: 250, jitter: 250 },
+      { cat: "Misc", base: 300, jitter: 450 }
+    ];
+
+    let idCounter = 0;
+    const nextId = (d) => `${d.getTime()}-${++idCounter}`;
+    const rand01 = (x) => {
+      const s = Math.sin(x) * 10000;
+      return s - Math.floor(s);
+    };
+
+    let monthIndex = 0;
+    for (let y = start.getFullYear(); y <= today.getFullYear(); y++) {
+      for (let m = (y === start.getFullYear() ? start.getMonth() : 0);
+           m <= (y === today.getFullYear() ? today.getMonth() : 11);
+           m++) {
+        monthlyIncome.forEach((inc, i) => {
+          const d = new Date(y, m, i === 0 ? 1 : (i === 1 ? 5 : 10));
+          txs.push(new Transaction({
+            id: nextId(d),
+            type: "income",
+            amount: inc.amount + Math.round((rand01(monthIndex * 10 + i) - 0.5) * 220),
+            category: inc.cat,
+            date: iso(d),
+            note: `Monthly income${extraNote ? " · " + extraNote : ""}`
+          }));
+        });
+
+        expenseCats.forEach((ex, i) => {
+          const day = 2 + ((i * 3 + monthIndex) % 24);
+          const d = new Date(y, m, Math.min(day, 28));
+          const r = rand01(monthIndex * 100 + i);
+          const amt = ex.base + Math.round((r - 0.5) * (ex.jitter * 2));
+          if (amt <= 0) return;
+          txs.push(new Transaction({
+            id: nextId(d),
+            type: "expense",
+            amount: amt,
+            category: ex.cat,
+            date: iso(d),
+            note: ex.cat === "Books" && (m === 5 || m === 11) ? "Semester books" : ""
+          }));
+        });
+
+        if (m === 6 || m === 0) {
+          const d = new Date(y, m, 15);
+          txs.push(new Transaction({
+            id: nextId(d),
+            type: "expense",
+            amount: 1800 + Math.round(rand01(monthIndex * 7) * 700),
+            category: "Travel",
+            date: iso(d),
+            note: "Trip / holiday travel"
+          }));
+        }
+        monthIndex++;
+      }
+    }
+    Storage.saveTx(username, txs);
+  };
+
+  ensureSeededUser(demoUser, 23, [
+    { cat: "Allowance", amount: 4000 },
+    { cat: "Part-time", amount: 2500 },
+    { cat: "Scholarship", amount: 1200 }
+  ]);
+
+  // New 3-year demo account + demo Axis bank connection
+  const demoUser3 = "student_3yr";
+  const demoPass3 = "demo3456";
+  const usersNow = Storage.loadUsers();
+  if (!usersNow.some((u) => u.username === demoUser3)) {
+    usersNow.push({ username: demoUser3, password_hash: User.hash(demoUser3, demoPass3) });
+    Storage.saveUsers(usersNow);
+  }
+  ensureSeededUser(demoUser3, 35, [
+    { cat: "Salary", amount: 28000 },
+    { cat: "Freelance", amount: 3500 }
+  ], "3-year profile");
+
+  // Auto connect demo Axis bank for this user if not already connected.
+  const b = Storage.loadBank(demoUser3);
+  if (!b || !b.connected) {
+    Storage.saveBank(demoUser3, {
+      connected: true,
+      connected_at: Date.now(),
+      bank_name: "Axis",
+      account_holder: demoUser3,
+      account_mask: "XXXX-4582",
+      ifsc: "UTIB0000458",
+      source: "demo"
+    });
+  }
+}
+
+// ---------- UI helpers ----------
+const $ = (id) => document.getElementById(id);
+const fmtINR = (v) => `₹${Math.round(v).toLocaleString("en-IN")}`;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+function salaryKey(username) { return `et_salary_category_v1_${username}`; }
+function recurringSalaryKey(username) { return `et_recurring_salary_v1_${username}`; }
+
+function monthKeyFromDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`;
+}
+
+function dateIso(y, m1to12, day1to28) {
+  const m = String(m1to12).padStart(2, "0");
+  const d = String(day1to28).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function loadRecurringSalary(username) {
+  try {
+    return JSON.parse(localStorage.getItem(recurringSalaryKey(username)) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function saveRecurringSalary(username, cfg) {
+  localStorage.setItem(recurringSalaryKey(username), JSON.stringify(cfg));
+}
+
+function applyRecurringSalaryIfNeeded() {
+  if (!tracker) return 0;
+  const cfg = loadRecurringSalary(tracker.username);
+  if (!cfg || !cfg.enabled) return 0;
+
+  const amount = Number(cfg.amount || 0);
+  const day = Math.max(1, Math.min(28, Number(cfg.day || 1)));
+  const category = String(cfg.category || "Salary").trim() || "Salary";
+  if (!Number.isFinite(amount) || amount <= 0) return 0;
+
+  const today = new Date();
+  const currentMonth = monthKeyFromDate(today);
+  const startMonth = cfg.last_applied_month || currentMonth;
+
+  // Convert YYYY-MM to number index for month iteration.
+  const toIndex = (mk) => {
+    const [y, m] = mk.split("-").map(Number);
+    return y * 12 + (m - 1);
+  };
+  const fromIndex = (idx) => {
+    const y = Math.floor(idx / 12);
+    const m = (idx % 12) + 1;
+    return { y, m };
+  };
+
+  let imported = 0;
+  const startIdx = toIndex(startMonth);
+  const endIdx = toIndex(currentMonth);
+
+  for (let idx = startIdx; idx <= endIdx; idx++) {
+    const { y, m } = fromIndex(idx);
+    const iso = dateIso(y, m, day);
+
+    // Don't add for future date in current month.
+    if (idx === endIdx) {
+      const [yy, mm, dd] = iso.split("-").map(Number);
+      const payoutDate = new Date(yy, mm - 1, dd);
+      if (payoutDate > today) break;
+    }
+
+    // Avoid duplicates if already present.
+    const exists = tracker.txs.some(
+      (t) =>
+        t.type === "income" &&
+        t.date === iso &&
+        String(t.category || "").toLowerCase() === category.toLowerCase() &&
+        String(t.note || "").toLowerCase().includes("recurring salary")
+    );
+    if (!exists) {
+      tracker.add({
+        type: "income",
+        amount,
+        category,
+        date: iso,
+        note: "Recurring salary"
+      });
+      imported++;
+    }
+  }
+
+  if (imported > 0) tracker.save();
+  // Mark as processed up to current month.
+  saveRecurringSalary(tracker.username, {
+    ...cfg,
+    amount,
+    day,
+    category,
+    enabled: true,
+    last_applied_month: currentMonth
+  });
+  return imported;
+}
+
+const COLORS = {
+  green: "#3cc878",
+  red: "#dc4646",
+  blue: "#7a93ff",
+  amber: "#dcb43c",
+  bg: "#0b0c10",
+  panel: "#121522",
+  border: "rgba(255,255,255,0.10)"
+};
+const PALETTE = ["#3cc878","#dc4646","#7a93ff","#dcb43c","#a05adc","#50c8c8","#ff7a59","#8bd450"];
+
+function clearCanvas(canvas) {
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth;
+  const cssH = canvas.clientHeight;
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, cssW, cssH);
+  return { ctx, w: cssW, h: cssH };
+}
+
+function drawPie(canvas, legendEl, items) {
+  const { ctx, w, h } = clearCanvas(canvas);
+  ctx.fillStyle = "rgba(0,0,0,0.0)";
+  ctx.fillRect(0,0,w,h);
+
+  const total = items.reduce((a,b)=>a + Math.max(0,b.value), 0);
+  legendEl.innerHTML = "";
+  if (total <= 0) {
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.font = "14px system-ui";
+    ctx.fillText("No data yet.", 16, 28);
+    return;
+  }
+
+  const r = Math.min(w, h) * 0.32;
+  const cx = w * 0.55;
+  const cy = h * 0.52;
+  let start = -Math.PI/2;
+
+  items.forEach((it, i) => {
+    const val = Math.max(0, it.value);
+    if (val <= 0) return;
+    const ang = (val / total) * Math.PI * 2;
+    const end = start + ang;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = it.color || PALETTE[i % PALETTE.length];
+    ctx.fill();
+    start = end;
+
+    const li = document.createElement("div");
+    li.className = "legend-item";
+    li.innerHTML = `<span class="dot" style="background:${ctx.fillStyle}"></span><span>${it.label}: ${fmtINR(val)}</span>`;
+    legendEl.appendChild(li);
+  });
+}
+
+function drawBars(canvas, totals, { mode = "expense", maxBars = 10 } = {}) {
+  const { ctx, w, h } = clearCanvas(canvas);
+  const data = totals.slice(-maxBars);
+  if (!data.length) {
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.font = "14px system-ui";
+    ctx.fillText("No data yet.", 16, 28);
+    return;
+  }
+
+  const pad = 16;
+  const baseY = h - 34;
+  const chartH = h - 60;
+  const maxVal = Math.max(1, ...data.map(x => mode === "expense" ? x.expense : x.income));
+  const barW = (w - pad*2) / data.length;
+  const col = mode === "expense" ? COLORS.red : COLORS.green;
+
+  ctx.strokeStyle = "rgba(255,255,255,0.10)";
+  ctx.beginPath();
+  ctx.moveTo(pad, baseY);
+  ctx.lineTo(w - pad, baseY);
+  ctx.stroke();
+
+  data.forEach((t, i) => {
+    const v = mode === "expense" ? t.expense : t.income;
+    const bh = (v / maxVal) * (chartH - 8);
+    const x = pad + i * barW + 8;
+    const y = baseY - bh;
+    ctx.fillStyle = col;
+    roundRect(ctx, x, y, Math.max(8, barW - 16), bh, 6);
+    ctx.fill();
+  });
+
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.font = "11px system-ui";
+  const show = Math.min(6, data.length);
+  const last = data.slice(-show);
+  last.forEach((t, idx) => {
+    const i = data.length - show + idx;
+    const x = pad + i * barW + 8;
+    ctx.fillText(t.label, x, h - 14);
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  const rr = clamp(r, 0, Math.min(w/2, h/2));
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+// ---------- App state ----------
+let route = "home";
+let isRegisterMode = false;
+let addType = "expense";
+let quickType = "expense";
+let tracker = null;
+
+function setRoute(r) {
+  route = r;
+  document.querySelectorAll(".nav-item").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.route === r);
+  });
+  ["home","add","reports","ai"].forEach(v => {
+    $(v + "View").classList.toggle("hidden", v !== r);
+  });
+  renderAll();
+}
+
+function showAuth() {
+  $("authView").classList.remove("hidden");
+  ["home","add","reports","ai"].forEach(v => $(v+"View").classList.add("hidden"));
+  $("userBadge").classList.add("hidden");
+  $("logoutBtn").classList.add("hidden");
+}
+
+function showApp(username) {
+  $("authView").classList.add("hidden");
+  $("userBadge").textContent = `@${username}`;
+  $("userBadge").classList.remove("hidden");
+  $("logoutBtn").classList.remove("hidden");
+  setRoute(route);
+}
+
+// ---------- Bank (demo connect + CSV import) ----------
+function openBankModal() {
+  $("bankModal").classList.remove("hidden");
+  renderBankStatus();
+}
+function closeBankModal() {
+  $("bankModal").classList.add("hidden");
+  $("bankImportError").classList.add("hidden");
+}
+
+function bankState() {
+  if (!tracker) return null;
+  return Storage.loadBank(tracker.username) || { connected: false, connected_at: null };
+}
+function setBankState(next) {
+  if (!tracker) return;
+  Storage.saveBank(tracker.username, next);
+  renderBankStatus();
+}
+function renderBankStatus() {
+  if (!tracker) return;
+  const st = bankState();
+  const connected = !!st?.connected;
+  if (!connected) {
+    $("bankStatus").textContent = "Not connected";
+  } else {
+    const bankName = st.bank_name ? ` · ${st.bank_name}` : "";
+    const mask = st.account_mask ? ` · ${st.account_mask}` : "";
+    $("bankStatus").textContent =
+      `Connected${bankName}${mask} · ${new Date(st.connected_at).toLocaleString()}`;
+  }
+  $("bankMsg").textContent = connected
+    ? "You can import CSV transactions or simulate a sync. (Live bank login requires backend integration.)"
+    : "Select a bank and connect. (Live bank login requires backend integration.)";
+}
+
+function parseBankDetails(text, filename = "") {
+  const name = (filename || "").toLowerCase();
+  const trimmed = (text || "").trim();
+  if (!trimmed) return { ok: false, error: "Empty file." };
+
+  // JSON format
+  if (name.endsWith(".json") || trimmed.startsWith("{")) {
+    try {
+      const obj = JSON.parse(trimmed);
+      const bank_name = String(obj.bank_name || obj.bank || "").trim();
+      const account_holder = String(obj.account_holder || obj.holder || "").trim();
+      const account_last4 = String(obj.account_last4 || obj.last4 || "").trim();
+      const ifsc = String(obj.ifsc || "").trim();
+      if (!bank_name || !account_last4) return { ok: false, error: "JSON must include bank_name and account_last4." };
+      return {
+        ok: true,
+        details: {
+          bank_name,
+          account_holder,
+          account_mask: `XXXX-${account_last4}`,
+          ifsc
+        }
+      };
+    } catch {
+      return { ok: false, error: "Invalid JSON." };
+    }
+  }
+
+  // CSV format: bank_name,account_holder,account_last4,ifsc (header optional)
+  const lines = trimmed.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+  if (!lines.length) return { ok: false, error: "Empty CSV." };
+  let row = lines[0];
+  if (row.toLowerCase().includes("bank") && lines.length > 1) row = lines[1];
+  const parts = row.split(",").map(x => x.trim());
+  if (parts.length < 2) return { ok: false, error: "CSV needs at least: bank_name,account_last4 (or bank_name,account_holder,account_last4,ifsc)." };
+  const bank_name = parts[0] || "";
+  const account_holder = parts.length >= 4 ? (parts[1] || "") : "";
+  const account_last4 = parts.length >= 4 ? (parts[2] || "") : (parts[1] || "");
+  const ifsc = parts.length >= 4 ? (parts[3] || "") : "";
+  if (!bank_name || !account_last4) return { ok: false, error: "CSV must include bank_name and account_last4." };
+  return { ok: true, details: { bank_name, account_holder, account_mask: `XXXX-${account_last4}`, ifsc } };
+}
+
+function parseCsv(text) {
+  // Simple CSV: each line "date,description,amount"
+  const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+  const rows = [];
+  for (const line of lines) {
+    const parts = line.split(",");
+    if (parts.length < 3) continue;
+    const date = parts[0].trim();
+    const amount = Number(parts[parts.length - 1].trim());
+    const description = parts.slice(1, parts.length - 1).join(",").trim();
+    rows.push({ date, description, amount });
+  }
+  return rows;
+}
+
+function inferCategory(description) {
+  const d = (description || "").toLowerCase();
+  if (d.includes("swiggy") || d.includes("zomato") || d.includes("cafe") || d.includes("restaurant")) return "Food";
+  if (d.includes("uber") || d.includes("ola") || d.includes("metro") || d.includes("bus") || d.includes("petrol") || d.includes("fuel")) return "Travel";
+  if (d.includes("netflix") || d.includes("spotify") || d.includes("movie") || d.includes("bookmyshow")) return "Entertainment";
+  if (d.includes("rent") || d.includes("hostel")) return "Rent";
+  if (d.includes("electric") || d.includes("water") || d.includes("recharge") || d.includes("wifi") || d.includes("internet")) return "Bills";
+  if (d.includes("pharmacy") || d.includes("hospital")) return "Health";
+  return "Misc";
+}
+
+function importBankRows(rows) {
+  if (!tracker) return { ok:false, error:"Not logged in." };
+  const st = bankState();
+  if (!st?.connected) return { ok:false, error:"Connect bank (demo) first." };
+
+  let imported = 0;
+  for (const r of rows) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date)) continue;
+    if (!Number.isFinite(r.amount) || r.amount === 0) continue;
+    const type = r.amount > 0 ? "income" : "expense";
+    const amt = Math.abs(r.amount);
+    const category = inferCategory(r.description);
+    tracker.add({
+      type,
+      amount: amt,
+      category,
+      date: r.date,
+      note: `Bank: ${r.description}`.slice(0, 90)
+    });
+    imported++;
+  }
+  tracker.save();
+  renderAll();
+  return { ok:true, imported };
+}
+
+// ---------- Rendering ----------
+function renderHome() {
+  if (!tracker) return;
+  const sum = tracker.summary();
+  $("statIncome").textContent = fmtINR(sum.income);
+  $("statExpense").textContent = fmtINR(sum.expense);
+  $("statBalance").textContent = fmtINR(sum.balance);
+  $("statBalance").classList.toggle("green", sum.balance >= 0);
+  $("statBalance").classList.toggle("red", sum.balance < 0);
+
+  const hi = tracker.highestSpendingCategory();
+  $("statHighest").textContent = hi ? `${hi.category} · ${fmtINR(hi.amount)}` : "—";
+
+  // Salary-only (income filtered by chosen category keyword)
+  const recurringCfg = loadRecurringSalary(tracker.username);
+  const defaultSalaryCat = (recurringCfg?.category || "Salary").trim() || "Salary";
+  const savedCat = (localStorage.getItem(salaryKey(tracker.username)) || defaultSalaryCat).trim() || "Salary";
+  if ($("salaryCategory") && $("salaryCategory").value !== savedCat) $("salaryCategory").value = savedCat;
+  const needle = savedCat.toLowerCase();
+  let salaryTotal = 0;
+  for (const t of tracker.txs) {
+    if (t.type !== "income") continue;
+    const c = String(t.category || "").toLowerCase();
+    if (c === needle || c.includes(needle)) salaryTotal += t.amount;
+  }
+  // Smart fallback for common salary-like categories when strict category has no matches.
+  if (salaryTotal <= 0) {
+    const salaryLike = ["salary", "allowance", "stipend", "part-time", "part time", "scholarship", "payout"];
+    for (const t of tracker.txs) {
+      if (t.type !== "income") continue;
+      const c = String(t.category || "").toLowerCase();
+      if (salaryLike.some((k) => c.includes(k))) salaryTotal += t.amount;
+    }
+  }
+  const recurringAmount = Number(recurringCfg?.amount || 0);
+  const displaySalary = (recurringCfg?.enabled && recurringAmount > 0) ? recurringAmount : salaryTotal;
+  if ($("statSalary")) $("statSalary").textContent = fmtINR(displaySalary);
+
+  // Recurring salary UI defaults/status
+  const rec = recurringCfg;
+  if (rec && $("salaryRecurringAmount") && $("salaryRecurringDay")) {
+    if (!$("salaryRecurringAmount").value) $("salaryRecurringAmount").value = String(rec.amount || "");
+    if (!$("salaryRecurringDay").value) $("salaryRecurringDay").value = String(rec.day || 1);
+  }
+  if ($("salaryRecurringMsg")) {
+    if (rec?.enabled) {
+      $("salaryRecurringMsg").textContent =
+        `Recurring salary active: ${fmtINR(Number(rec.amount || 0))} on day ${rec.day || 1} in category "${rec.category || "Salary"}".`;
+    } else {
+      $("salaryRecurringMsg").textContent = "Recurring salary is not set.";
+    }
+  }
+
+  // table (latest 40)
+  const body = $("txTableBody");
+  body.innerHTML = "";
+  const txs = tracker.txs.slice().reverse().slice(0, 40);
+  for (const t of txs) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${t.date}</td>
+      <td><span class="pill ${t.type}">${t.type}</span></td>
+      <td>${escapeHtml(t.category)}</td>
+      <td class="right">${fmtINR(t.amount)}</td>
+      <td>${escapeHtml(t.note || "")}</td>
+      <td class="right"><button class="btn btn-ghost small" data-del="${t.id}">Delete</button></td>
+    `;
+    body.appendChild(tr);
+  }
+  body.querySelectorAll("button[data-del]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      tracker.deleteById(btn.dataset.del);
+      tracker.save();
+      renderAll();
+    });
+  });
+
+  // pie charts
+  const byCat = [...tracker.expenseByCategory().entries()]
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,6)
+    .map(([cat, amt], i) => ({ label: cat, value: amt, color: PALETTE[i % PALETTE.length] }));
+  drawPie($("pieCategories"), $("pieCategoriesLegend"), byCat);
+  drawPie($("pieIncomeExpense"), $("pieIncomeExpenseLegend"), [
+    { label:"Income", value: sum.income, color: COLORS.green },
+    { label:"Expense", value: sum.expense, color: COLORS.red }
+  ]);
+}
+
+function renderReports() {
+  if (!tracker) return;
+  const cmpW = Analytics.compareLatestTwo(tracker.txs, "week");
+  const cmpM = Analytics.compareLatestTwo(tracker.txs, "month");
+  const cmpY = Analytics.compareLatestTwo(tracker.txs, "year");
+  renderCmp($("weeklyCmp"), cmpW);
+  renderCmp($("monthlyCmp"), cmpM);
+  renderCmp($("yearlyCmp"), cmpY);
+
+  const weeks = Analytics.totalsByPeriod(tracker.txs, "week");
+  const months = Analytics.totalsByPeriod(tracker.txs, "month");
+  drawBars($("barWeekly"), weeks, { mode: "expense", maxBars: 10 });
+  drawBars($("barMonthly"), months, { mode: "expense", maxBars: 10 });
+
+  renderTotalsTable($("weeklyTotalsBody"), weeks.slice(-6), "week");
+  renderTotalsTable($("monthlyTotalsBody"), months.slice(-6), "month");
+}
+
+function renderAI() {
+  if (!tracker) return;
+  const advice = AIAdvisor.analyze(tracker);
+  $("aiAlerts").innerHTML = advice.alerts.map(x => `<li>${escapeHtml(x)}</li>`).join("");
+  $("aiSuggestions").innerHTML = advice.suggestions.map(x => `<li>${escapeHtml(x)}</li>`).join("");
+  $("aiForecast").innerHTML = `
+    <div>Predicted next week expenses: <b>${fmtINR(advice.forecast.next_week)}</b></div>
+    <div>Predicted next month expenses: <b>${fmtINR(advice.forecast.next_month)}</b></div>
+  `;
+}
+
+function renderAll() {
+  if (!tracker) return;
+  if (route === "home") renderHome();
+  if (route === "reports") renderReports();
+  if (route === "ai") renderAI();
+}
+
+function renderCmp(el, cmp) {
+  if (!cmp) {
+    el.innerHTML = `<div class="muted">Not enough data yet (need 2+ periods).</div>`;
+    return;
+  }
+  const better = cmp.delta_expense <= 0;
+  const arrow = cmp.delta_expense < 0 ? "↓" : (cmp.delta_expense > 0 ? "↑" : "→");
+  const badgeClass = better ? "good" : "bad";
+  const badgeText = better ? "Better (spent less)" : "Worse (spent more)";
+
+  el.innerHTML = `
+    <div class="report-grid">
+      <div class="report-row">
+        <div class="report-key">Current period</div>
+        <div class="report-val">${cmp.current.label}</div>
+      </div>
+      <div class="report-row">
+        <div class="report-key">Expense (current)</div>
+        <div class="report-val">${fmtINR(cmp.current.expense)}</div>
+      </div>
+      <div class="report-row">
+        <div class="report-key">Expense (previous)</div>
+        <div class="report-val">${fmtINR(cmp.previous.expense)}</div>
+      </div>
+      <div class="report-row">
+        <div class="report-key">Change</div>
+        <div class="report-val">
+          <span class="badge-mini ${badgeClass}">${arrow} ${fmtINR(cmp.delta_expense)} (${cmp.percent_change.toFixed(1)}%)</span>
+        </div>
+      </div>
+      <div class="report-row">
+        <div class="report-key">Result</div>
+        <div class="report-val"><span class="badge-mini ${badgeClass}">${badgeText}</span></div>
+      </div>
+      <div class="report-row">
+        <div class="report-key">Money saved</div>
+        <div class="report-val" style="color:${COLORS.green}">${fmtINR(cmp.money_saved)}</div>
+      </div>
+      <div class="report-row">
+        <div class="report-key">Extra spending</div>
+        <div class="report-val" style="color:${COLORS.red}">${fmtINR(cmp.extra_spending)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTotalsTable(tbody, totals, mode) {
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  if (!totals.length) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="4" class="muted">No data yet.</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+
+  for (const t of totals) {
+    const net = t.income - t.expense;
+    const netCol = net >= 0 ? "green" : "red";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(t.label)}</td>
+      <td class="right">${fmtINR(t.income)}</td>
+      <td class="right">${fmtINR(t.expense)}</td>
+      <td class="right"><span class="${netCol}">${fmtINR(net)}</span></td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function escapeHtml(s) {
+  return String(s || "").replace(/[&<>"']/g, (c) => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+  }[c]));
+}
+
+// ---------- Events ----------
+function init() {
+  seedExampleUserIfMissing();
+
+  // nav
+  document.querySelectorAll(".nav-item").forEach(btn => {
+    btn.addEventListener("click", () => setRoute(btn.dataset.route));
+  });
+
+  // auth
+  const syncAuthMode = () => {
+    $("authTitle").textContent = isRegisterMode ? "Register" : "Login";
+    $("authSubmit").textContent = isRegisterMode ? "Register" : "Login";
+    $("authToggle").textContent = isRegisterMode ? "Already have an account? Login" : "New here? Register";
+  };
+  syncAuthMode();
+
+  $("authToggle").addEventListener("click", () => {
+    isRegisterMode = !isRegisterMode;
+    $("authError").classList.add("hidden");
+    syncAuthMode();
+  });
+  $("authSubmit").addEventListener("click", () => {
+    const u = $("authUsername").value;
+    const p = $("authPassword").value;
+    const res = isRegisterMode ? User.register(u, p) : User.login(u, p);
+    if (!res.ok) {
+      $("authError").textContent = res.error;
+      $("authError").classList.remove("hidden");
+      return;
+    }
+    if (isRegisterMode) {
+      // auto-login after register
+      const loginRes = User.login(u, p);
+      if (!loginRes.ok) return;
+    }
+    startSession();
+  });
+
+  $("logoutBtn").addEventListener("click", () => {
+    Storage.clearSession();
+    tracker = null;
+    showAuth();
+  });
+
+  // salary category preference
+  if ($("saveSalaryCategory")) {
+    $("saveSalaryCategory").addEventListener("click", () => {
+      if (!tracker) return;
+      const v = ($("salaryCategory")?.value || "Salary").trim() || "Salary";
+      localStorage.setItem(salaryKey(tracker.username), v);
+      renderHome();
+    });
+  }
+  if ($("saveRecurringSalary")) {
+    $("saveRecurringSalary").addEventListener("click", () => {
+      if (!tracker) return;
+      const amount = Number($("salaryRecurringAmount")?.value || 0);
+      const day = Number($("salaryRecurringDay")?.value || 1);
+      const category = ($("salaryCategory")?.value || "Salary").trim() || "Salary";
+      const msg = $("salaryRecurringMsg");
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        if (msg) msg.textContent = "Enter a valid recurring salary amount (> 0).";
+        return;
+      }
+      if (!Number.isFinite(day) || day < 1 || day > 28) {
+        if (msg) msg.textContent = "Payout day must be between 1 and 28.";
+        return;
+      }
+
+      const nowMonth = monthKeyFromDate(new Date());
+      saveRecurringSalary(tracker.username, {
+        enabled: true,
+        amount,
+        day: Math.round(day),
+        category,
+        last_applied_month: nowMonth
+      });
+
+      // Apply for current month immediately if payout date has passed.
+      const added = applyRecurringSalaryIfNeeded();
+      if (msg) {
+        msg.textContent = added > 0
+          ? `Recurring salary saved. Added ${added} salary entr${added > 1 ? "ies" : "y"}.`
+          : "Recurring salary saved.";
+      }
+      renderHome();
+    });
+  }
+
+  // bank modal
+  $("bankBtn").addEventListener("click", () => openBankModal());
+  $("bankCloseX").addEventListener("click", () => closeBankModal());
+  $("bankCloseBackdrop").addEventListener("click", () => closeBankModal());
+
+  // bank details side panel
+  const showDetails = () => $("bankDetailsPanel").classList.remove("hidden");
+  const hideDetails = () => $("bankDetailsPanel").classList.add("hidden");
+  $("bankDetailsToggle").addEventListener("click", () => {
+    $("bankDetailsPanel").classList.toggle("hidden");
+    $("bankDetailsError").classList.add("hidden");
+  });
+  $("bankDetailsClose").addEventListener("click", () => hideDetails());
+  $("bankDisconnect").addEventListener("click", () => {
+    if (!tracker) return;
+    Storage.clearBank(tracker.username);
+    renderBankStatus();
+  });
+
+  // bank choice + connect
+  let selectedBankName = "HDFC";
+  document.querySelectorAll(".bank-choice").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedBankName = btn.dataset.bank || selectedBankName;
+      document.querySelectorAll(".bank-choice").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+  // default highlight first
+  const firstChoice = document.querySelector(".bank-choice");
+  if (firstChoice) firstChoice.classList.add("active");
+
+  $("bankConnectReal").addEventListener("click", () => {
+    if (!tracker) return;
+    // UI-only “connect”: stores selected bank for this user.
+    setBankState({
+      connected: true,
+      connected_at: Date.now(),
+      bank_name: selectedBankName,
+      account_holder: tracker.username,
+      account_mask: "XXXX-0000",
+      ifsc: "",
+      source: "ui"
+    });
+    $("bankMsg").textContent = `Selected ${selectedBankName}. Now import transactions below to populate your dashboard.`;
+  });
+
+  $("bankImport").addEventListener("click", async () => {
+    $("bankImportError").classList.add("hidden");
+    const file = $("bankCsv").files?.[0];
+    if (!file) {
+      $("bankImportError").textContent = "Please choose a CSV file first.";
+      $("bankImportError").classList.remove("hidden");
+      return;
+    }
+    const text = await file.text();
+    const rows = parseCsv(text);
+    const res = importBankRows(rows);
+    if (!res.ok) {
+      $("bankImportError").textContent = res.error;
+      $("bankImportError").classList.remove("hidden");
+      return;
+    }
+    $("bankMsg").textContent = `Imported ${res.imported} transactions from CSV.`;
+  });
+
+  $("bankSimulate").addEventListener("click", () => {
+    $("bankImportError").classList.add("hidden");
+    const st = bankState();
+    if (!st?.connected) {
+      $("bankImportError").textContent = "Connect bank (demo) first.";
+      $("bankImportError").classList.remove("hidden");
+      return;
+    }
+    // Simulate last 30 days expenses + 1 income.
+    const today = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const samples = [
+      { desc: "Swiggy order", amt: -220 },
+      { desc: "Metro card recharge", amt: -150 },
+      { desc: "Netflix subscription", amt: -199 },
+      { desc: "Canteen", amt: -80 },
+      { desc: "Fuel", amt: -300 },
+      { desc: "Grocery store", amt: -420 },
+      { desc: "Part-time payout", amt: 1200 }
+    ];
+    const rows = [];
+    for (let i = 0; i < 22; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - (i + 1));
+      const s = samples[i % samples.length];
+      rows.push({ date: iso(d), description: s.desc, amount: s.amt });
+    }
+    const res = importBankRows(rows);
+    if (res.ok) $("bankMsg").textContent = `Simulated sync: imported ${res.imported} transactions.`;
+  });
+
+  $("bankDetailsImport").addEventListener("click", async () => {
+    $("bankDetailsError").classList.add("hidden");
+    const file = $("bankDetailsFile").files?.[0];
+    if (!file) {
+      $("bankDetailsError").textContent = "Please choose a JSON/CSV file first.";
+      $("bankDetailsError").classList.remove("hidden");
+      return;
+    }
+    const text = await file.text();
+    const parsed = parseBankDetails(text, file.name);
+    if (!parsed.ok) {
+      $("bankDetailsError").textContent = parsed.error;
+      $("bankDetailsError").classList.remove("hidden");
+      return;
+    }
+    setBankState({
+      connected: true,
+      connected_at: Date.now(),
+      ...parsed.details,
+      source: "import"
+    });
+    $("bankMsg").textContent = "Bank account details imported and connected (display only).";
+  });
+
+  // add tx
+  $("typeIncome").addEventListener("click", () => setAddType("income"));
+  $("typeExpense").addEventListener("click", () => setAddType("expense"));
+  $("addSubmit").addEventListener("click", () => {
+    if (!tracker) return;
+    const amount = Number($("txAmount").value);
+    const category = ($("txCategory").value || "").trim();
+    const date = $("txDate").value;
+    const note = $("txNote").value || "";
+
+    const err = validateAdd({ amount, category, date });
+    if (err) {
+      $("addError").textContent = err;
+      $("addError").classList.remove("hidden");
+      return;
+    }
+    $("addError").classList.add("hidden");
+    tracker.add({ type: addType, amount, category, date, note });
+    tracker.save();
+    $("txAmount").value = "";
+    $("txNote").value = "";
+    setRoute("home");
+  });
+  $("addClear").addEventListener("click", () => {
+    $("txAmount").value = "";
+    $("txCategory").value = "";
+    $("txNote").value = "";
+    $("addError").classList.add("hidden");
+  });
+
+  // quick add on home
+  $("qTypeIncome").addEventListener("click", () => setQuickType("income"));
+  $("qTypeExpense").addEventListener("click", () => setQuickType("expense"));
+  $("qAddSubmit").addEventListener("click", () => {
+    if (!tracker) return;
+    const amount = Number($("qAmount").value);
+    const category = ($("qCategory").value || "").trim();
+    const date = $("qDate").value;
+    const note = $("qNote").value || "";
+
+    const err = validateAdd({ amount, category, date });
+    if (err) {
+      $("qError").textContent = err;
+      $("qError").classList.remove("hidden");
+      return;
+    }
+    $("qError").classList.add("hidden");
+    tracker.add({ type: quickType, amount, category, date, note });
+    tracker.save();
+    $("qAmount").value = "";
+    $("qNote").value = "";
+    renderAll();
+  });
+  $("qClear").addEventListener("click", () => {
+    $("qAmount").value = "";
+    $("qCategory").value = "";
+    $("qNote").value = "";
+    $("qError").classList.add("hidden");
+  });
+  $("goToAddPage").addEventListener("click", () => setRoute("add"));
+
+  $("aiRefresh").addEventListener("click", () => renderAI());
+
+  // default date
+  $("txDate").value = Transaction.todayISO();
+  $("qDate").value = Transaction.todayISO();
+  setAddType("expense");
+  setQuickType("expense");
+
+  // session restore
+  const sess = Storage.loadSession();
+  if (sess && sess.username) startSession();
+  else showAuth();
+
+  // redraw charts on resize
+  window.addEventListener("resize", () => renderAll());
+}
+
+function startSession() {
+  const sess = Storage.loadSession();
+  if (!sess?.username) { showAuth(); return; }
+  tracker = new ExpenseTracker(sess.username);
+  applyRecurringSalaryIfNeeded();
+  showApp(sess.username);
+  renderAll();
+  renderBankStatus();
+}
+
+function validateAdd({ amount, category, date }) {
+  if (!Number.isFinite(amount) || amount <= 0) return "Amount must be > 0.";
+  if (!category) return "Category is required (e.g., Food, Rent, Travel).";
+  if (!date) return "Date is required.";
+  return null;
+}
+
+function setAddType(t) {
+  addType = t;
+  $("typeIncome").classList.toggle("active", t === "income");
+  $("typeExpense").classList.toggle("active", t === "expense");
+}
+
+function setQuickType(t) {
+  quickType = t;
+  $("qTypeIncome").classList.toggle("active", t === "income");
+  $("qTypeExpense").classList.toggle("active", t === "expense");
+}
+
+init();
+
+
+
+====================================================================================================
+FILE: server/main.cc
+====================================================================================================
+
+#include <drogon/drogon.h>
+
+#include "AppService.h"
+#include "WebController.h"
+
+int main() {
+  AppService::seedDemoUsersIfMissing();
+
+  drogon::app()
+      .setLogLevel(trantor::Logger::kWarn)
+      .setThreadNum(1)
+      .enableSession(60 * 60 * 24)
+      .addListener("0.0.0.0", 8080)
+      .setDocumentRoot("../web")
+      .setUploadPath("./uploads")
+      .registerHandler("/health", [](const drogon::HttpRequestPtr&,
+                                     std::function<void(const drogon::HttpResponsePtr&)>&& cb) {
+        auto r = drogon::HttpResponse::newHttpJsonResponse(Json::Value{{"ok", true}});
+        cb(r);
+      });
+
+  drogon::app().run();
+  return 0;
+}
+
+
+
+====================================================================================================
+FILE: server/AppService.h
+====================================================================================================
+
+#pragma once
+
+#include <optional>
+#include <string>
+#include <vector>
+
+#include "core/AIAdvisor.h"
+#include "core/Analytics.h"
+#include "core/ExpenseTracker.h"
+
+struct RecurringSalaryConfig {
+  bool enabled{false};
+  double amount{0.0};
+  int day{1}; // 1..28
+  std::string category{"Salary"};
+  std::string lastAppliedMonth; // YYYY-MM
+};
+
+struct BankConnection {
+  bool connected{false};
+  std::string bankName;
+  std::string accountMask;
+  std::string ifsc;
+};
+
+class AppService {
+public:
+  static void seedDemoUsersIfMissing();
+
+  static bool registerUser(const std::string& username, const std::string& password,
+                           std::string& error);
+  static bool loginUser(const std::string& username, const std::string& password,
+                        std::string& error);
+
+  static ExpenseTracker loadTracker(const std::string& username);
+  static void saveTracker(const ExpenseTracker& tracker);
+
+  static bool deleteTransaction(ExpenseTracker& tracker, const std::string& id);
+
+  static Summary summary(const ExpenseTracker& tracker);
+  static AIAdvice aiAdvice(const ExpenseTracker& tracker);
+  static std::vector<PeriodTotals> periodTotals(const ExpenseTracker& tracker, Period p);
+  static std::optional<PeriodComparison> periodCompare(const ExpenseTracker& tracker, Period p);
+
+  static std::string salaryCategory(const std::string& username);
+  static void setSalaryCategory(const std::string& username, const std::string& category);
+  static double salaryOnlyValue(const ExpenseTracker& tracker, const std::string& username);
+
+  static RecurringSalaryConfig recurringSalary(const std::string& username);
+  static void setRecurringSalary(const std::string& username, const RecurringSalaryConfig& cfg);
+  static int applyRecurringSalaryIfNeeded(const std::string& username, ExpenseTracker& tracker);
+
+  static BankConnection bank(const std::string& username);
+  static void setBank(const std::string& username, const BankConnection& b);
+  static void clearBank(const std::string& username);
+  static int importBankCsv(const std::string& username, ExpenseTracker& tracker,
+                           const std::string& csvText);
+
+private:
+  static std::string metaDir();
+  static std::string salaryFile(const std::string& username);
+  static std::string recurringFile(const std::string& username);
+  static std::string bankFile(const std::string& username);
+};
+
+
+
+====================================================================================================
+FILE: server/AppService.cc
+====================================================================================================
+
+#include "AppService.h"
+
+#include <algorithm>
+#include <cctype>
+#include <cmath>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+#include <drogon/utils/Utilities.h>
+
+#include "core/FileStorage.h"
+#include "core/User.h"
+
+namespace {
+std::string trim(const std::string& s) {
+  size_t a = 0;
+  while (a < s.size() && std::isspace(static_cast<unsigned char>(s[a]))) ++a;
+  size_t b = s.size();
+  while (b > a && std::isspace(static_cast<unsigned char>(s[b - 1]))) --b;
+  return s.substr(a, b - a);
+}
+
+std::string monthKeyNow() {
+  const auto d = Transaction::todayLocal();
+  std::ostringstream oss;
+  oss << d.year << "-";
+  if (d.month < 10) oss << '0';
+  oss << d.month;
+  return oss.str();
+}
+
+Date dateFromMonthDay(const std::string& monthKey, int day) {
+  int y = 0, m = 1;
+  if (monthKey.size() >= 7) {
+    y = std::stoi(monthKey.substr(0, 4));
+    m = std::stoi(monthKey.substr(5, 2));
+  }
+  return Date{y, m, day};
+}
+
+std::vector<std::string> splitLines(const std::string& s) {
+  std::vector<std::string> out;
+  std::stringstream ss(s);
+  std::string line;
+  while (std::getline(ss, line)) {
+    if (!line.empty() && line.back() == '\r') line.pop_back();
+    if (!trim(line).empty()) out.push_back(line);
+  }
+  return out;
+}
+} // namespace
+
+std::string AppService::metaDir() {
+  const auto dir = std::filesystem::path(FileStorage::dataDir()) / "meta";
+  std::error_code ec;
+  std::filesystem::create_directories(dir, ec);
+  return dir.string();
+}
+
+std::string AppService::salaryFile(const std::string& username) {
+  return (std::filesystem::path(metaDir()) / (username + "_salary.txt")).string();
+}
+std::string AppService::recurringFile(const std::string& username) {
+  return (std::filesystem::path(metaDir()) / (username + "_recurring.txt")).string();
+}
+std::string AppService::bankFile(const std::string& username) {
+  return (std::filesystem::path(metaDir()) / (username + "_bank.txt")).string();
+}
+
+bool AppService::registerUser(const std::string& username, const std::string& password,
+                              std::string& error) {
+  return User::registerUser(username, password, error);
+}
+
+bool AppService::loginUser(const std::string& username, const std::string& password,
+                           std::string& error) {
+  return User::login(username, password, error);
+}
+
+ExpenseTracker AppService::loadTracker(const std::string& username) {
+  ExpenseTracker t(username);
+  t.load();
+  return t;
+}
+
+void AppService::saveTracker(const ExpenseTracker& tracker) { tracker.save(); }
+
+bool AppService::deleteTransaction(ExpenseTracker& tracker, const std::string& id) {
+  const bool ok = tracker.deleteById(id);
+  if (ok) tracker.save();
+  return ok;
+}
+
+Summary AppService::summary(const ExpenseTracker& tracker) { return tracker.summary(); }
+AIAdvice AppService::aiAdvice(const ExpenseTracker& tracker) { return AIAdvisor::analyze(tracker); }
+std::vector<PeriodTotals> AppService::periodTotals(const ExpenseTracker& tracker, Period p) {
+  return Analytics::totalsByPeriod(tracker.transactions(), p);
+}
+std::optional<PeriodComparison> AppService::periodCompare(const ExpenseTracker& tracker, Period p) {
+  return Analytics::compareLatestTwoPeriods(tracker.transactions(), p);
+}
+
+std::string AppService::salaryCategory(const std::string& username) {
+  std::ifstream in(salaryFile(username));
+  std::string s;
+  if (in && std::getline(in, s)) {
+    s = trim(s);
+    if (!s.empty()) return s;
+  }
+  return "Salary";
+}
+
+void AppService::setSalaryCategory(const std::string& username, const std::string& category) {
+  std::ofstream out(salaryFile(username), std::ios::trunc);
+  out << trim(category);
+}
+
+RecurringSalaryConfig AppService::recurringSalary(const std::string& username) {
+  RecurringSalaryConfig cfg{};
+  std::ifstream in(recurringFile(username));
+  if (!in) return cfg;
+  std::string line;
+  while (std::getline(in, line)) {
+    const auto pos = line.find('=');
+    if (pos == std::string::npos) continue;
+    const auto k = trim(line.substr(0, pos));
+    const auto v = trim(line.substr(pos + 1));
+    if (k == "enabled") cfg.enabled = (v == "1");
+    if (k == "amount") cfg.amount = std::stod(v);
+    if (k == "day") cfg.day = std::stoi(v);
+    if (k == "category") cfg.category = v;
+    if (k == "last") cfg.lastAppliedMonth = v;
+  }
+  if (cfg.day < 1 || cfg.day > 28) cfg.day = 1;
+  if (cfg.category.empty()) cfg.category = "Salary";
+  return cfg;
+}
+
+void AppService::setRecurringSalary(const std::string& username, const RecurringSalaryConfig& cfg) {
+  std::ofstream out(recurringFile(username), std::ios::trunc);
+  out << "enabled=" << (cfg.enabled ? "1" : "0") << "\n";
+  out << "amount=" << cfg.amount << "\n";
+  out << "day=" << std::clamp(cfg.day, 1, 28) << "\n";
+  out << "category=" << cfg.category << "\n";
+  out << "last=" << cfg.lastAppliedMonth << "\n";
+}
+
+int AppService::applyRecurringSalaryIfNeeded(const std::string& username, ExpenseTracker& tracker) {
+  auto cfg = recurringSalary(username);
+  if (!cfg.enabled || cfg.amount <= 0.0) return 0;
+
+  const std::string nowM = monthKeyNow();
+  if (cfg.lastAppliedMonth.empty()) cfg.lastAppliedMonth = nowM;
+
+  auto toIdx = [](const std::string& m) {
+    const int y = std::stoi(m.substr(0, 4));
+    const int mo = std::stoi(m.substr(5, 2));
+    return y * 12 + (mo - 1);
+  };
+  auto fromIdx = [](int idx) {
+    const int y = idx / 12;
+    const int mo = (idx % 12) + 1;
+    std::ostringstream oss;
+    oss << y << "-";
+    if (mo < 10) oss << '0';
+    oss << mo;
+    return oss.str();
+  };
+
+  int added = 0;
+  const int begin = toIdx(cfg.lastAppliedMonth);
+  const int end = toIdx(nowM);
+  const Date today = Transaction::todayLocal();
+
+  for (int i = begin; i <= end; ++i) {
+    const auto mk = fromIdx(i);
+    const Date d = dateFromMonthDay(mk, cfg.day);
+    if (i == end) {
+      if (d.year > today.year ||
+          (d.year == today.year && d.month > today.month) ||
+          (d.year == today.year && d.month == today.month && d.day > today.day)) {
+        break;
+      }
+    }
+    bool exists = false;
+    for (const auto& t : tracker.transactions()) {
+      if (t.type() != TransactionType::Income) continue;
+      if (t.category() != cfg.category) continue;
+      if (t.note().find("Recurring salary") == std::string::npos) continue;
+      if (t.date().year == d.year && t.date().month == d.month && t.date().day == d.day) {
+        exists = true;
+        break;
+      }
+    }
+    if (!exists) {
+      tracker.addTransaction(TransactionType::Income, cfg.amount, cfg.category, d, "Recurring salary");
+      ++added;
+    }
+  }
+  if (added > 0) tracker.save();
+  cfg.lastAppliedMonth = nowM;
+  setRecurringSalary(username, cfg);
+  return added;
+}
+
+double AppService::salaryOnlyValue(const ExpenseTracker& tracker, const std::string& username) {
+  const auto cfg = recurringSalary(username);
+  if (cfg.enabled && cfg.amount > 0.0) return cfg.amount;
+
+  const std::string category = drogon::utils::toLower(salaryCategory(username));
+  double total = 0.0;
+  for (const auto& t : tracker.transactions()) {
+    if (t.type() != TransactionType::Income) continue;
+    const auto c = drogon::utils::toLower(t.category());
+    if (c == category || c.find(category) != std::string::npos) total += t.amount();
+  }
+  if (total > 0.0) return total;
+
+  static const std::vector<std::string> keys = {"salary", "allowance", "stipend", "part-time",
+                                                 "scholarship", "payout"};
+  for (const auto& t : tracker.transactions()) {
+    if (t.type() != TransactionType::Income) continue;
+    const auto c = drogon::utils::toLower(t.category());
+    for (const auto& k : keys) {
+      if (c.find(k) != std::string::npos) {
+        total += t.amount();
+        break;
+      }
+    }
+  }
+  return total;
+}
+
+BankConnection AppService::bank(const std::string& username) {
+  BankConnection b{};
+  std::ifstream in(bankFile(username));
+  if (!in) return b;
+  std::string line;
+  while (std::getline(in, line)) {
+    const auto pos = line.find('=');
+    if (pos == std::string::npos) continue;
+    const auto k = trim(line.substr(0, pos));
+    const auto v = trim(line.substr(pos + 1));
+    if (k == "connected") b.connected = (v == "1");
+    if (k == "name") b.bankName = v;
+    if (k == "mask") b.accountMask = v;
+    if (k == "ifsc") b.ifsc = v;
+  }
+  return b;
+}
+
+void AppService::setBank(const std::string& username, const BankConnection& b) {
+  std::ofstream out(bankFile(username), std::ios::trunc);
+  out << "connected=" << (b.connected ? "1" : "0") << "\n";
+  out << "name=" << b.bankName << "\n";
+  out << "mask=" << b.accountMask << "\n";
+  out << "ifsc=" << b.ifsc << "\n";
+}
+
+void AppService::clearBank(const std::string& username) {
+  std::error_code ec;
+  std::filesystem::remove(bankFile(username), ec);
+}
+
+int AppService::importBankCsv(const std::string& username, ExpenseTracker& tracker,
+                              const std::string& csvText) {
+  const auto b = bank(username);
+  if (!b.connected) return 0;
+  int count = 0;
+  for (const auto& line : splitLines(csvText)) {
+    std::stringstream ss(line);
+    std::string date, description, amountS;
+    std::getline(ss, date, ',');
+    std::getline(ss, description, ',');
+    std::getline(ss, amountS, ',');
+    const auto d = Transaction::dateFromString(trim(date));
+    if (!d) continue;
+    double amount = 0.0;
+    try {
+      amount = std::stod(trim(amountS));
+    } catch (...) {
+      continue;
+    }
+    if (std::abs(amount) < 1e-9) continue;
+    TransactionType type = amount > 0 ? TransactionType::Income : TransactionType::Expense;
+    const double absAmt = std::abs(amount);
+    std::string category = "Misc";
+    const auto descLower = drogon::utils::toLower(description);
+    if (descLower.find("swiggy") != std::string::npos || descLower.find("zomato") != std::string::npos)
+      category = "Food";
+    else if (descLower.find("metro") != std::string::npos || descLower.find("uber") != std::string::npos)
+      category = "Travel";
+    else if (descLower.find("rent") != std::string::npos)
+      category = "Rent";
+    else if (descLower.find("salary") != std::string::npos || descLower.find("payout") != std::string::npos)
+      category = "Salary";
+
+    tracker.addTransaction(type, absAmt, category, *d, "Bank: " + trim(description));
+    ++count;
+  }
+  if (count > 0) tracker.save();
+  return count;
+}
+
+void AppService::seedDemoUsersIfMissing() {
+  std::string err;
+  User::registerUser("student_2yr", "demo1234", err);
+  User::registerUser("student_3yr", "demo3456", err);
+
+  auto seed = [](const std::string& username, int monthsBack,
+                 const std::vector<std::pair<std::string, double>>& incomeCats) {
+    ExpenseTracker t(username);
+    t.load();
+    if (!t.transactions().empty()) return;
+    const Date today = Transaction::todayLocal();
+    int month = today.month;
+    int year = today.year;
+    for (int i = 0; i <= monthsBack; ++i) {
+      int m = month - i;
+      int y = year;
+      while (m <= 0) {
+        m += 12;
+        --y;
+      }
+      for (size_t j = 0; j < incomeCats.size(); ++j) {
+        t.addTransaction(TransactionType::Income, incomeCats[j].second, incomeCats[j].first,
+                         Date{y, m, static_cast<int>(j) + 1}, "Monthly income");
+      }
+      t.addTransaction(TransactionType::Expense, 2600.0 + (i % 7) * 90.0, "Food",
+                       Date{y, m, 4}, "");
+      t.addTransaction(TransactionType::Expense, 3500.0, "Rent", Date{y, m, 7}, "");
+      t.addTransaction(TransactionType::Expense, 900.0 + (i % 5) * 60.0, "Travel",
+                       Date{y, m, 12}, "");
+      t.addTransaction(TransactionType::Expense, 700.0 + (i % 8) * 45.0, "Bills",
+                       Date{y, m, 16}, "");
+      t.addTransaction(TransactionType::Expense, 650.0 + (i % 6) * 55.0, "Entertainment",
+                       Date{y, m, 20}, "");
+    }
+    t.save();
+  };
+
+  seed("student_2yr", 23, {{"Allowance", 4000.0}, {"Part-time", 2500.0}, {"Scholarship", 1200.0}});
+  seed("student_3yr", 35, {{"Salary", 28000.0}, {"Freelance", 3500.0}});
+
+  setBank("student_3yr", BankConnection{true, "Axis", "XXXX-4582", "UTIB0000458"});
+}
+
+
+
+====================================================================================================
+FILE: server/WebController.h
+====================================================================================================
+
+#pragma once
+
+#include <drogon/HttpController.h>
+
+using namespace drogon;
+
+class WebController : public drogon::HttpController<WebController> {
+public:
+  METHOD_LIST_BEGIN
+  METHOD_ADD(WebController::root, "/", Get);
+  METHOD_ADD(WebController::loginPage, "/login", Get);
+  METHOD_ADD(WebController::registerPage, "/register", Get);
+  METHOD_ADD(WebController::loginSubmit, "/login", Post);
+  METHOD_ADD(WebController::registerSubmit, "/register", Post);
+  METHOD_ADD(WebController::logout, "/logout", Post);
+  METHOD_ADD(WebController::dashboard, "/dashboard", Get);
+  METHOD_ADD(WebController::addTx, "/tx/add", Post);
+  METHOD_ADD(WebController::deleteTx, "/tx/delete", Post);
+  METHOD_ADD(WebController::saveSalaryCategory, "/salary/category", Post);
+  METHOD_ADD(WebController::saveRecurringSalary, "/salary/recurring", Post);
+  METHOD_ADD(WebController::connectBank, "/bank/connect", Post);
+  METHOD_ADD(WebController::disconnectBank, "/bank/disconnect", Post);
+  METHOD_ADD(WebController::importBankCsv, "/bank/import_csv", Post);
+  METHOD_LIST_END
+
+  static std::string currentUser(const HttpRequestPtr& req);
+  static HttpResponsePtr redirect(const std::string& path);
+  static std::string htmlEscape(std::string v);
+  static std::string money(double value);
+
+  void root(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void loginPage(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void registerPage(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void loginSubmit(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void registerSubmit(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void logout(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void dashboard(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void addTx(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void deleteTx(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void saveSalaryCategory(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void saveRecurringSalary(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void connectBank(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void disconnectBank(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+  void importBankCsv(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb);
+};
+
+
+
+====================================================================================================
+FILE: server/WebController.cc
+====================================================================================================
+
+#include "WebController.h"
+
+#include <algorithm>
+#include <cmath>
+#include <sstream>
+
+#include "AppService.h"
+#include "core/Transaction.h"
+
+std::string WebController::currentUser(const HttpRequestPtr& req) {
+  if (auto session = req->session()) {
+    if (session->find("username") != session->end()) return session->get<std::string>("username");
+  }
+  return {};
+}
+
+HttpResponsePtr WebController::redirect(const std::string& path) {
+  auto r = HttpResponse::newHttpResponse();
+  r->setStatusCode(k302Found);
+  r->addHeader("Location", path);
+  return r;
+}
+
+std::string WebController::htmlEscape(std::string v) {
+  std::string out;
+  out.reserve(v.size());
+  for (char c : v) {
+    if (c == '&') out += "&amp;";
+    else if (c == '<') out += "&lt;";
+    else if (c == '>') out += "&gt;";
+    else if (c == '"') out += "&quot;";
+    else out.push_back(c);
+  }
+  return out;
+}
+
+std::string WebController::money(double value) {
+  std::ostringstream oss;
+  oss.setf(std::ios::fixed);
+  oss.precision(0);
+  oss << "INR " << std::round(value);
+  return oss.str();
+}
+
+namespace {
+std::string pageStart(const std::string& title) {
+  return "<!doctype html><html><head><meta charset='utf-8'/>"
+         "<meta name='viewport' content='width=device-width, initial-scale=1'/>"
+         "<title>" + title + "</title>"
+         "<style>"
+         "body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:linear-gradient(135deg,#d9ecff,#87c6ff);color:#111}"
+         ".top{background:rgba(255,255,255,.88);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #bcd}"
+         ".shell{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 56px)}"
+         ".side{background:rgba(233,245,255,.92);padding:14px;border-right:1px solid #bcd}"
+         ".btn{display:inline-block;background:#bfe3ff;border:1px solid #70b4f4;color:#111;border-radius:10px;padding:8px 12px;text-decoration:none}"
+         ".nav{display:flex;flex-direction:column;gap:8px}.card{background:#bfe3ff;border:1px solid #70b4f4;border-radius:14px;padding:12px;margin:10px 0}"
+         ".main{padding:16px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}"
+         ".tbl{width:100%;border-collapse:collapse}.tbl td,.tbl th{border-bottom:1px solid #9bc6ea;padding:6px;text-align:left}.small{font-size:12px;color:#334}"
+         "input,select,textarea{padding:8px;border-radius:8px;border:1px solid #8fb8dd}textarea{width:100%;min-height:90px}"
+         "@media(max-width:980px){.shell{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}"
+         "</style></head><body>";
+}
+
+std::string pageEnd() { return "</body></html>"; }
+
+std::string authPage(const std::string& title, const std::string& action, const std::string& error = {}) {
+  std::string h = pageStart(title);
+  h += "<div class='main' style='max-width:560px;margin:40px auto'>"
+       "<div class='card'><h2>" + title + "</h2>";
+  if (!error.empty()) h += "<p style='color:#b00'>" + error + "</p>";
+  h += "<form method='post' action='" + action + "'>"
+       "<div class='row'><label>Username <input name='username' required/></label></div>"
+       "<div class='row'><label>Password <input type='password' name='password' required/></label></div>"
+       "<div class='row'><button class='btn' type='submit'>" + title + "</button></div>"
+       "</form>";
+  if (title == "Login")
+    h += "<p class='small'>No account? <a href='/register'>Register</a></p>";
+  else
+    h += "<p class='small'>Have account? <a href='/login'>Login</a></p>";
+  h += "<p class='small'>Demo users: student_2yr/demo1234 and student_3yr/demo3456</p>";
+  h += "</div></div>" + pageEnd();
+  return h;
+}
+
+std::string renderDashboard(const std::string& user, ExpenseTracker& tracker, const std::string& note) {
+  const auto s = AppService::summary(tracker);
+  const auto highest = tracker.highestSpendingCategory();
+  const auto cat = AppService::salaryCategory(user);
+  const auto sal = AppService::salaryOnlyValue(tracker, user);
+  auto rec = AppService::recurringSalary(user);
+  auto bank = AppService::bank(user);
+  auto ai = AppService::aiAdvice(tracker);
+  auto cmpW = AppService::periodCompare(tracker, Period::Week);
+  auto cmpM = AppService::periodCompare(tracker, Period::Month);
+  auto cmpY = AppService::periodCompare(tracker, Period::Year);
+
+  std::string h = pageStart("Expense Tracker C++");
+  h += "<div class='top'><div><b>Expense Tracker (C++ Drogon)</b></div><div class='row'><span class='small'>@" +
+       WebController::htmlEscape(user) +
+       "</span><form method='post' action='/logout'><button class='btn'>Logout</button></form></div></div>";
+  h += "<div class='shell'><aside class='side'><div class='nav'>"
+       "<a class='btn' href='/dashboard'>Home</a>"
+       "<a class='btn' href='#add'>Add Transaction</a>"
+       "<a class='btn' href='#reports'>Reports</a>"
+       "<a class='btn' href='#ai'>AI Suggestions</a>"
+       "<a class='btn' href='#bank'>Connect Bank</a></div>"
+       "<p class='small' style='margin-top:16px'>Data stored locally in data/</p>"
+       "</aside><main class='main'>";
+  if (!note.empty()) h += "<p style='color:#064'>" + WebController::htmlEscape(note) + "</p>";
+
+  h += "<h2>Dashboard</h2><div class='grid'>"
+       "<div class='card'><div class='small'>Total income</div><b>" + WebController::money(s.total_income) + "</b></div>"
+       "<div class='card'><div class='small'>Total expense</div><b>" + WebController::money(s.total_expense) + "</b></div>"
+       "<div class='card'><div class='small'>Net balance</div><b>" + WebController::money(s.net_balance) + "</b></div>"
+       "<div class='card'><div class='small'>Salary (only)</div><b>" + WebController::money(sal) + "</b></div>"
+       "<div class='card'><div class='small'>Highest spend</div><b>" +
+       (highest ? WebController::htmlEscape(highest->first + " (" + WebController::money(highest->second) + ")") : "None") +
+       "</b></div>"
+       "<div class='card'><div class='small'>Salary category</div><b>" + WebController::htmlEscape(cat) + "</b></div>"
+       "</div>";
+
+  h += "<div id='add' class='card'><h3>Add transaction</h3>"
+       "<form method='post' action='/tx/add'><div class='row'>"
+       "<label>Type <select name='type'><option value='income'>Income</option><option value='expense' selected>Expense</option></select></label>"
+       "<label>Amount <input type='number' step='0.01' min='0.01' name='amount' required/></label>"
+       "<label>Category <input name='category' required/></label>"
+       "<label>Date (YYYY-MM-DD) <input name='date' value='" + Transaction::dateToString(Transaction::todayLocal()) + "' required/></label>"
+       "</div><div class='row'><label style='flex:1'>Note <input name='note'/></label></div>"
+       "<div class='row'><button class='btn' type='submit'>Add</button></div></form></div>";
+
+  h += "<div class='card'><h3>Salary settings</h3><div class='row'>"
+       "<form method='post' action='/salary/category'><label>Category <input name='category' value='" + WebController::htmlEscape(cat) +
+       "'/></label><button class='btn' type='submit'>Save category</button></form></div>"
+       "<form method='post' action='/salary/recurring'><div class='row'>"
+       "<label>Recurring amount <input type='number' step='0.01' min='0' name='amount' value='" + std::to_string(rec.amount) + "'/></label>"
+       "<label>Payout day (1-28) <input type='number' min='1' max='28' name='day' value='" + std::to_string(rec.day) + "'/></label>"
+       "<label>Category <input name='category' value='" + WebController::htmlEscape(rec.category) + "'/></label>"
+       "<button class='btn' type='submit'>Set recurring</button></div></form></div>";
+
+  h += "<div id='reports' class='card'><h3>Reports</h3><div class='grid'>";
+  auto cmpCard = [&](const char* title, const std::optional<PeriodComparison>& c) {
+    h += "<div class='card'><h4>" + std::string(title) + "</h4>";
+    if (!c) {
+      h += "<p class='small'>Not enough data</p>";
+    } else {
+      h += "<p>Current " + WebController::htmlEscape(c->current.label) + ": " + WebController::money(c->current.expense) + "</p>";
+      h += "<p>Previous " + WebController::htmlEscape(c->previous.label) + ": " + WebController::money(c->previous.expense) + "</p>";
+      h += "<p>Change: " + WebController::money(c->delta_expense) + " (" + std::to_string(c->percent_change) + "%)</p>";
+      h += "<p>Saved: " + WebController::money(c->money_saved) + " | Extra: " + WebController::money(c->extra_spending) + "</p>";
+    }
+    h += "</div>";
+  };
+  cmpCard("Weekly", cmpW);
+  cmpCard("Monthly", cmpM);
+  cmpCard("Yearly", cmpY);
+  h += "</div></div>";
+
+  h += "<div id='ai' class='card'><h3>AI suggestions</h3><div class='grid'><div class='card'><h4>Alerts</h4><ul>";
+  for (const auto& a : ai.alerts) h += "<li>" + WebController::htmlEscape(a) + "</li>";
+  h += "</ul></div><div class='card'><h4>Suggestions</h4><ul>";
+  for (const auto& sgt : ai.suggestions) h += "<li>" + WebController::htmlEscape(sgt) + "</li>";
+  h += "</ul></div><div class='card'><h4>Forecast</h4><p>Next week expense: " +
+       WebController::money(ai.forecast.next_week_expense) + "</p><p>Next month expense: " +
+       WebController::money(ai.forecast.next_month_expense) + "</p></div></div></div>";
+
+  h += "<div id='bank' class='card'><h3>Bank connection</h3>"
+       "<p>Status: <b>" + std::string(bank.connected ? "Connected" : "Not connected") + "</b> " +
+       WebController::htmlEscape(bank.bankName) + " " + WebController::htmlEscape(bank.accountMask) + "</p>"
+       "<form method='post' action='/bank/connect'><div class='row'>"
+       "<label>Bank <select name='bank'><option>HDFC</option><option>ICICI</option><option>Axis</option><option>YES Bank</option></select></label>"
+       "<button class='btn' type='submit'>Connect bank</button></div></form>"
+       "<form method='post' action='/bank/disconnect'><button class='btn' type='submit'>Disconnect</button></form>"
+       "<form method='post' action='/bank/import_csv'><p class='small'>CSV rows: date,description,amount (negative expense, positive income)</p>"
+       "<textarea name='csv'></textarea><div class='row'><button class='btn' type='submit'>Import CSV</button></div></form></div>";
+
+  h += "<div class='card'><h3>Recent transactions</h3><div style='overflow:auto'><table class='tbl'><thead><tr>"
+       "<th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Note</th><th>Delete</th></tr></thead><tbody>";
+  auto txs = tracker.transactions();
+  const int maxRows = std::min<int>(40, static_cast<int>(txs.size()));
+  for (int i = 0; i < maxRows; ++i) {
+    const auto& t = txs[txs.size() - 1 - static_cast<size_t>(i)];
+    h += "<tr><td>" + Transaction::dateToString(t.date()) + "</td><td>" + Transaction::typeToString(t.type()) +
+         "</td><td>" + WebController::htmlEscape(t.category()) + "</td><td>" + WebController::money(t.amount()) +
+         "</td><td>" + WebController::htmlEscape(t.note()) + "</td>"
+         "<td><form method='post' action='/tx/delete'><input type='hidden' name='id' value='" +
+         WebController::htmlEscape(t.id()) + "'/><button class='btn'>Delete</button></form></td></tr>";
+  }
+  h += "</tbody></table></div></div>";
+
+  h += "</main></div>" + pageEnd();
+  return h;
+}
+} // namespace
+
+void WebController::root(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+  if (currentUser(req).empty()) return cb(redirect("/login"));
+  cb(redirect("/dashboard"));
+}
+
+void WebController::loginPage(const HttpRequestPtr&, std::function<void(const HttpResponsePtr&)>&& cb) {
+  auto r = HttpResponse::newHttpResponse();
+  r->setContentTypeCode(CT_TEXT_HTML);
+  r->setBody(authPage("Login", "/login"));
+  cb(r);
+}
+
+void WebController::registerPage(const HttpRequestPtr&, std::function<void(const HttpResponsePtr&)>&& cb) {
+  auto r = HttpResponse::newHttpResponse();
+  r->setContentTypeCode(CT_TEXT_HTML);
+  r->setBody(authPage("Register", "/register"));
+  cb(r);
+}
+
+void WebController::loginSubmit(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+  std::string error;
+  const auto username = req->getParameter("username");
+  const auto password = req->getParameter("password");
+  if (!AppService::loginUser(username, password, error)) {
+    auto r = HttpResponse::newHttpResponse();
+    r->setContentTypeCode(CT_TEXT_HTML);
+    r->setBody(authPage("Login", "/login", htmlEscape(error)));
+    return cb(r);
+  }
+  req->session()->insert("username", username);
+  cb(redirect("/dashboard"));
+}
+
+void WebController::registerSubmit(const HttpRequestPtr& req,
+                                   std::function<void(const HttpResponsePtr&)>&& cb) {
+  std::string error;
+  const auto username = req->getParameter("username");
+  const auto password = req->getParameter("password");
+  if (!AppService::registerUser(username, password, error)) {
+    auto r = HttpResponse::newHttpResponse();
+    r->setContentTypeCode(CT_TEXT_HTML);
+    r->setBody(authPage("Register", "/register", htmlEscape(error)));
+    return cb(r);
+  }
+  req->session()->insert("username", username);
+  cb(redirect("/dashboard"));
+}
+
+void WebController::logout(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+  req->session()->erase("username");
+  cb(redirect("/login"));
+}
+
+void WebController::dashboard(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+  const auto user = currentUser(req);
+  if (user.empty()) return cb(redirect("/login"));
+  auto tracker = AppService::loadTracker(user);
+  AppService::applyRecurringSalaryIfNeeded(user, tracker);
+
+  auto r = HttpResponse::newHttpResponse();
+  r->setContentTypeCode(CT_TEXT_HTML);
+  r->setBody(renderDashboard(user, tracker, req->getParameter("msg")));
+  cb(r);
+}
+
+void WebController::addTx(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+  const auto user = currentUser(req);
+  if (user.empty()) return cb(redirect("/login"));
+  auto tracker = AppService::loadTracker(user);
+
+  const auto typeS = req->getParameter("type");
+  const auto amountS = req->getParameter("amount");
+  const auto category = req->getParameter("category");
+  const auto dateS = req->getParameter("date");
+  const auto note = req->getParameter("note");
+
+  double amount = 0.0;
+  try {
+    amount = std::stod(amountS);
+  } catch (...) {
+    return cb(redirect("/dashboard?msg=Invalid%20amount"));
+  }
+  const auto date = Transaction::dateFromString(dateS);
+  if (amount <= 0.0 || !date || category.empty()) return cb(redirect("/dashboard?msg=Invalid%20input"));
+
+  const auto type = (typeS == "income") ? TransactionType::Income : TransactionType::Expense;
+  tracker.addTransaction(type, amount, category, *date, note);
+  tracker.save();
+  cb(redirect("/dashboard?msg=Transaction%20added"));
+}
+
+void WebController::deleteTx(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+  const auto user = currentUser(req);
+  if (user.empty()) return cb(redirect("/login"));
+  auto tracker = AppService::loadTracker(user);
+  AppService::deleteTransaction(tracker, req->getParameter("id"));
+  cb(redirect("/dashboard?msg=Transaction%20deleted"));
+}
+
+void WebController::saveSalaryCategory(const HttpRequestPtr& req,
+                                       std::function<void(const HttpResponsePtr&)>&& cb) {
+  const auto user = currentUser(req);
+  if (user.empty()) return cb(redirect("/login"));
+  const auto cat = req->getParameter("category");
+  AppService::setSalaryCategory(user, cat.empty() ? "Salary" : cat);
+  cb(redirect("/dashboard?msg=Salary%20category%20saved"));
+}
+
+void WebController::saveRecurringSalary(const HttpRequestPtr& req,
+                                        std::function<void(const HttpResponsePtr&)>&& cb) {
+  const auto user = currentUser(req);
+  if (user.empty()) return cb(redirect("/login"));
+  RecurringSalaryConfig cfg = AppService::recurringSalary(user);
+  try {
+    cfg.amount = std::stod(req->getParameter("amount"));
+  } catch (...) {
+    cfg.amount = 0.0;
+  }
+  try {
+    cfg.day = std::stoi(req->getParameter("day"));
+  } catch (...) {
+    cfg.day = 1;
+  }
+  cfg.day = std::clamp(cfg.day, 1, 28);
+  cfg.category = req->getParameter("category").empty() ? "Salary" : req->getParameter("category");
+  cfg.enabled = cfg.amount > 0.0;
+  {
+    const auto d = Transaction::todayLocal();
+    std::ostringstream oss;
+    oss << d.year << "-";
+    if (d.month < 10) oss << '0';
+    oss << d.month;
+    cfg.lastAppliedMonth = oss.str();
+  }
+  AppService::setRecurringSalary(user, cfg);
+
+  auto tracker = AppService::loadTracker(user);
+  AppService::applyRecurringSalaryIfNeeded(user, tracker);
+  cb(redirect("/dashboard?msg=Recurring%20salary%20updated"));
+}
+
+void WebController::connectBank(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& cb) {
+  const auto user = currentUser(req);
+  if (user.empty()) return cb(redirect("/login"));
+  const auto bank = req->getParameter("bank");
+  AppService::setBank(user, BankConnection{true, bank.empty() ? "Axis" : bank, "XXXX-0000", ""});
+  cb(redirect("/dashboard?msg=Bank%20connected"));
+}
+
+void WebController::disconnectBank(const HttpRequestPtr& req,
+                                   std::function<void(const HttpResponsePtr&)>&& cb) {
+  const auto user = currentUser(req);
+  if (user.empty()) return cb(redirect("/login"));
+  AppService::clearBank(user);
+  cb(redirect("/dashboard?msg=Bank%20disconnected"));
+}
+
+void WebController::importBankCsv(const HttpRequestPtr& req,
+                                  std::function<void(const HttpResponsePtr&)>&& cb) {
+  const auto user = currentUser(req);
+  if (user.empty()) return cb(redirect("/login"));
+  auto tracker = AppService::loadTracker(user);
+  const int imported = AppService::importBankCsv(user, tracker, req->getParameter("csv"));
+  cb(redirect("/dashboard?msg=Imported%20" + std::to_string(imported) + "%20transactions"));
+}
+
+
+
+====================================================================================================
+FILE: src/core/Transaction.h
+====================================================================================================
+
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+
+enum class TransactionType : std::uint8_t { Income = 0, Expense = 1 };
+
+struct Date {
+  int year{};
+  int month{}; // 1-12
+  int day{};   // 1-31
+};
+
+class Transaction {
+public:
+  Transaction() = default;
+  Transaction(std::string id,
+              TransactionType type,
+              double amount,
+              std::string category,
+              Date date,
+              std::string note);
+
+  const std::string& id() const { return m_id; }
+  TransactionType type() const { return m_type; }
+  double amount() const { return m_amount; }
+  const std::string& category() const { return m_category; }
+  const Date& date() const { return m_date; }
+  const std::string& note() const { return m_note; }
+
+  std::string toCsvRow() const;
+  static std::optional<Transaction> fromCsvRow(const std::string& row);
+
+  static std::string typeToString(TransactionType type);
+  static std::optional<TransactionType> typeFromString(const std::string& s);
+
+  static std::string dateToString(const Date& d);             // YYYY-MM-DD
+  static std::optional<Date> dateFromString(const std::string& s);
+
+  static Date todayLocal();
+
+private:
+  std::string m_id;
+  TransactionType m_type{TransactionType::Expense};
+  double m_amount{0.0};
+  std::string m_category;
+  Date m_date{};
+  std::string m_note;
+};
+
+
+
+====================================================================================================
+FILE: src/core/Transaction.cpp
+====================================================================================================
+
+#include "core/Transaction.h"
+
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <optional>
+#include <sstream>
+#include <string>
+#include <vector>
+
+static std::vector<std::string> splitCsvSimple(const std::string& s) {
+  // Simple CSV: no quoted commas. Good enough for category/note input.
+  std::vector<std::string> out;
+  std::string cur;
+  for (char c : s) {
+    if (c == ',') {
+      out.push_back(cur);
+      cur.clear();
+    } else {
+      cur.push_back(c);
+    }
+  }
+  out.push_back(cur);
+  return out;
+}
+
+Transaction::Transaction(std::string id,
+                         TransactionType type,
+                         double amount,
+                         std::string category,
+                         Date date,
+                         std::string note)
+    : m_id(std::move(id)),
+      m_type(type),
+      m_amount(amount),
+      m_category(std::move(category)),
+      m_date(date),
+      m_note(std::move(note)) {}
+
+std::string Transaction::typeToString(TransactionType type) {
+  return (type == TransactionType::Income) ? "income" : "expense";
+}
+
+std::optional<TransactionType> Transaction::typeFromString(const std::string& s) {
+  if (s == "income") return TransactionType::Income;
+  if (s == "expense") return TransactionType::Expense;
+  return std::nullopt;
+}
+
+std::string Transaction::dateToString(const Date& d) {
+  std::ostringstream oss;
+  oss << std::setfill('0') << std::setw(4) << d.year << "-" << std::setw(2) << d.month
+      << "-" << std::setw(2) << d.day;
+  return oss.str();
+}
+
+std::optional<Date> Transaction::dateFromString(const std::string& s) {
+  // Accept YYYY-MM-DD only.
+  if (s.size() != 10 || s[4] != '-' || s[7] != '-') return std::nullopt;
+  try {
+    const int y = std::stoi(s.substr(0, 4));
+    const int m = std::stoi(s.substr(5, 2));
+    const int d = std::stoi(s.substr(8, 2));
+    if (y < 1900 || m < 1 || m > 12 || d < 1 || d > 31) return std::nullopt;
+    return Date{y, m, d};
+  } catch (...) {
+    return std::nullopt;
+  }
+}
+
+Date Transaction::todayLocal() {
+  using clock = std::chrono::system_clock;
+  std::time_t tt = clock::to_time_t(clock::now());
+  std::tm local{};
+#if defined(_WIN32)
+  localtime_s(&local, &tt);
+#else
+  local = *std::localtime(&tt);
+#endif
+  return Date{local.tm_year + 1900, local.tm_mon + 1, local.tm_mday};
+}
+
+std::string Transaction::toCsvRow() const {
+  // id,type,amount,category,date,note
+  std::ostringstream oss;
+  oss << m_id << "," << typeToString(m_type) << "," << std::fixed << std::setprecision(2)
+      << m_amount << "," << m_category << "," << dateToString(m_date) << "," << m_note;
+  return oss.str();
+}
+
+std::optional<Transaction> Transaction::fromCsvRow(const std::string& row) {
+  const auto parts = splitCsvSimple(row);
+  if (parts.size() < 6) return std::nullopt;
+
+  const auto maybeType = typeFromString(parts[1]);
+  if (!maybeType) return std::nullopt;
+
+  double amount = 0.0;
+  try {
+    amount = std::stod(parts[2]);
+  } catch (...) {
+    return std::nullopt;
+  }
+
+  const auto maybeDate = dateFromString(parts[4]);
+  if (!maybeDate) return std::nullopt;
+
+  return Transaction(parts[0], *maybeType, amount, parts[3], *maybeDate, parts[5]);
+}
+
+
+
+====================================================================================================
+FILE: src/core/User.h
+====================================================================================================
+
+#pragma once
+
+#include <optional>
+#include <string>
+
+class User {
+public:
+  // Credentials are stored in data/users.txt.
+  // Each line is: username|password_hash
+  static bool isValidUsername(const std::string& username);
+  static bool isValidPassword(const std::string& password);
+
+  // Registration/login against data/users.txt
+  static bool registerUser(const std::string& username, const std::string& password,
+                           std::string& out_error);
+  static bool login(const std::string& username, const std::string& password,
+                    std::string& out_error);
+
+  explicit User(std::string username) : m_username(std::move(username)) {}
+  const std::string& username() const { return m_username; }
+
+private:
+  std::string m_username;
+};
+
+
+
+====================================================================================================
+FILE: src/core/User.cpp
+====================================================================================================
+
+#include "core/User.h"
+
+#include "core/FileStorage.h"
+
+#include <algorithm>
+#include <cctype>
+#include <string>
+#include <vector>
+
+static std::string trim(const std::string& s) {
+  std::size_t a = 0;
+  while (a < s.size() && std::isspace(static_cast<unsigned char>(s[a]))) ++a;
+  std::size_t b = s.size();
+  while (b > a && std::isspace(static_cast<unsigned char>(s[b - 1]))) --b;
+  return s.substr(a, b - a);
+}
+
+bool User::isValidUsername(const std::string& username) {
+  const auto u = trim(username);
+  if (u.size() < 3 || u.size() > 20) return false;
+  for (char c : u) {
+    if (!(std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '-')) return false;
+  }
+  return true;
+}
+
+bool User::isValidPassword(const std::string& password) {
+  // Simple rules suitable for a college project.
+  if (password.size() < 4) return false;
+  return true;
+}
+
+bool User::registerUser(const std::string& username, const std::string& password,
+                        std::string& out_error) {
+  const auto u = trim(username);
+  if (!isValidUsername(u)) {
+    out_error = "Username must be 3-20 chars: letters/numbers/_/- only.";
+    return false;
+  }
+  if (!isValidPassword(password)) {
+    out_error = "Password must be at least 4 characters.";
+    return false;
+  }
+
+  auto users = FileStorage::loadUsers();
+  const auto it = std::find_if(users.begin(), users.end(),
+                               [&](const StoredUser& su) { return su.username == u; });
+  if (it != users.end()) {
+    out_error = "Username already exists.";
+    return false;
+  }
+
+  users.push_back(StoredUser{u, FileStorage::hashPassword(u, password)});
+  if (!FileStorage::saveUsers(users)) {
+    out_error = "Failed to write users.txt";
+    return false;
+  }
+
+  out_error.clear();
+  return true;
+}
+
+bool User::login(const std::string& username, const std::string& password,
+                 std::string& out_error) {
+  const auto u = trim(username);
+  if (u.empty()) {
+    out_error = "Username required.";
+    return false;
+  }
+  const auto users = FileStorage::loadUsers();
+  const auto it = std::find_if(users.begin(), users.end(),
+                               [&](const StoredUser& su) { return su.username == u; });
+  if (it == users.end()) {
+    out_error = "User not found. Please register.";
+    return false;
+  }
+
+  const auto hash = FileStorage::hashPassword(u, password);
+  if (hash != it->password_hash) {
+    out_error = "Incorrect password.";
+    return false;
+  }
+
+  out_error.clear();
+  return true;
+}
+
+
+
+====================================================================================================
+FILE: src/core/ExpenseTracker.h
+====================================================================================================
+
+#pragma once
+
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "core/Transaction.h"
+
+struct Summary {
+  double total_income{0.0};
+  double total_expense{0.0};
+  double net_balance{0.0};
+};
+
+class ExpenseTracker {
+public:
+  // Manages one user's transactions in-memory and persists them to
+  // data/<username>_transactions.csv via FileStorage.
+  explicit ExpenseTracker(std::string username);
+
+  const std::string& username() const { return m_username; }
+  const std::vector<Transaction>& transactions() const { return m_transactions; }
+
+  bool load();
+  bool save() const;
+
+  Transaction addTransaction(TransactionType type,
+                             double amount,
+                             std::string category,
+                             Date date,
+                             std::string note);
+
+  bool deleteById(const std::string& id);
+
+  Summary summary() const;
+  std::unordered_map<std::string, double> expenseByCategory() const;
+  std::optional<std::pair<std::string, double>> highestSpendingCategory() const;
+
+private:
+  std::string m_username;
+  std::vector<Transaction> m_transactions;
+  std::uint64_t m_idCounter{0};
+
+  std::string nextId();
+};
+
+
+
+====================================================================================================
+FILE: src/core/ExpenseTracker.cpp
+====================================================================================================
+
+#include "core/ExpenseTracker.h"
+
+#include "core/FileStorage.h"
+
+#include <algorithm>
+#include <chrono>
+#include <sstream>
+#include <unordered_map>
+#include <vector>
+
+ExpenseTracker::ExpenseTracker(std::string username) : m_username(std::move(username)) {}
+
+bool ExpenseTracker::load() {
+  m_transactions = FileStorage::loadTransactions(m_username);
+  return true;
+}
+
+bool ExpenseTracker::save() const {
+  return FileStorage::saveTransactions(m_username, m_transactions);
+}
+
+std::string ExpenseTracker::nextId() {
+  using clock = std::chrono::system_clock;
+  const auto now = clock::now().time_since_epoch();
+  const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+  std::ostringstream oss;
+  oss << ms << "-" << (++m_idCounter);
+  return oss.str();
+}
+
+Transaction ExpenseTracker::addTransaction(TransactionType type,
+                                           double amount,
+                                           std::string category,
+                                           Date date,
+                                           std::string note) {
+  Transaction t(nextId(), type, amount, std::move(category), date, std::move(note));
+  m_transactions.push_back(t);
+  return t;
+}
+
+bool ExpenseTracker::deleteById(const std::string& id) {
+  const auto before = m_transactions.size();
+  m_transactions.erase(std::remove_if(m_transactions.begin(), m_transactions.end(),
+                                      [&](const Transaction& t) { return t.id() == id; }),
+                       m_transactions.end());
+  return m_transactions.size() != before;
+}
+
+Summary ExpenseTracker::summary() const {
+  Summary s;
+  for (const auto& t : m_transactions) {
+    if (t.type() == TransactionType::Income)
+      s.total_income += t.amount();
+    else
+      s.total_expense += t.amount();
+  }
+  s.net_balance = s.total_income - s.total_expense;
+  return s;
+}
+
+std::unordered_map<std::string, double> ExpenseTracker::expenseByCategory() const {
+  std::unordered_map<std::string, double> out;
+  for (const auto& t : m_transactions) {
+    if (t.type() != TransactionType::Expense) continue;
+    out[t.category()] += t.amount();
+  }
+  return out;
+}
+
+std::optional<std::pair<std::string, double>> ExpenseTracker::highestSpendingCategory() const {
+  const auto byCat = expenseByCategory();
+  if (byCat.empty()) return std::nullopt;
+  auto best = std::pair<std::string, double>{"", 0.0};
+  for (const auto& [cat, amt] : byCat) {
+    if (amt > best.second) best = {cat, amt};
+  }
+  return best;
+}
+
+
+
+====================================================================================================
+FILE: src/core/Analytics.h
+====================================================================================================
+
+#pragma once
+
+#include "core/ExpenseTracker.h"
+
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+
+enum class Period : std::uint8_t { Week = 0, Month = 1, Year = 2 };
+
+struct PeriodTotals {
+  std::string label; // e.g. "2026-W17", "2026-04", "2026"
+  double income{0.0};
+  double expense{0.0};
+  double net{0.0};
+};
+
+struct PeriodComparison {
+  PeriodTotals current{};
+  PeriodTotals previous{};
+  double delta_expense{0.0};      // current.expense - previous.expense
+  double percent_change{0.0};     // vs previous (0 if previous is 0)
+  double money_saved{0.0};        // max(0, -delta_expense)
+  double extra_spending{0.0};     // max(0, delta_expense)
+};
+
+class Analytics {
+public:
+  static std::vector<PeriodTotals> totalsByPeriod(const std::vector<Transaction>& txs,
+                                                  Period period);
+  static std::optional<PeriodComparison> compareLatestTwoPeriods(const std::vector<Transaction>& txs,
+                                                                 Period period);
+};
+
+
+
+====================================================================================================
+FILE: src/core/Analytics.cpp
+====================================================================================================
+
+#include "core/Analytics.h"
+
+#include <algorithm>
+#include <chrono>
+#include <cstdio>
+#include <ctime>
+#include <map>
+#include <optional>
+#include <string>
+#include <vector>
+
+static std::tm toTmLocal(const Date& d) {
+  std::tm tm{};
+  tm.tm_year = d.year - 1900;
+  tm.tm_mon = d.month - 1;
+  tm.tm_mday = d.day;
+  tm.tm_hour = 12; // avoid DST issues
+  std::mktime(&tm); // normalize, fills wday/yday
+  return tm;
+}
+
+static Date fromTmLocal(const std::tm& tm) {
+  return Date{tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday};
+}
+
+static std::string periodLabel(const Date& d, Period p) {
+  const auto tm = toTmLocal(d);
+  if (p == Period::Year) {
+    return std::to_string(d.year);
+  }
+  if (p == Period::Month) {
+    const int y = d.year;
+    const int m = d.month;
+    char buf[16];
+    std::snprintf(buf, sizeof(buf), "%04d-%02d", y, m);
+    return buf;
+  }
+
+  // Week: label based on Monday-start week bucket (not strict ISO, but consistent).
+  // Compute Monday of this week, then compute week-of-year from that.
+  std::tm monday = tm;
+  const int wday = monday.tm_wday;          // 0=Sun..6=Sat
+  const int mondayOffset = (wday + 6) % 7; // Mon=0..Sun=6
+  monday.tm_mday -= mondayOffset;
+  std::mktime(&monday);
+
+  // week number: 1..53 based on monday's yday
+  const int weekNum = (monday.tm_yday / 7) + 1;
+  const int weekYear = monday.tm_year + 1900;
+  char buf[16];
+  std::snprintf(buf, sizeof(buf), "%04d-W%02d", weekYear, weekNum);
+  return buf;
+}
+
+std::vector<PeriodTotals> Analytics::totalsByPeriod(const std::vector<Transaction>& txs,
+                                                    Period period) {
+  std::map<std::string, PeriodTotals> buckets;
+  for (const auto& t : txs) {
+    const auto label = periodLabel(t.date(), period);
+    auto& b = buckets[label];
+    b.label = label;
+    if (t.type() == TransactionType::Income)
+      b.income += t.amount();
+    else
+      b.expense += t.amount();
+  }
+
+  std::vector<PeriodTotals> out;
+  out.reserve(buckets.size());
+  for (auto& [_, b] : buckets) {
+    b.net = b.income - b.expense;
+    out.push_back(b);
+  }
+
+  // map iteration gives us sorted by label already (lexicographic matches our label formats)
+  return out;
+}
+
+std::optional<PeriodComparison> Analytics::compareLatestTwoPeriods(const std::vector<Transaction>& txs,
+                                                                   Period period) {
+  auto totals = totalsByPeriod(txs, period);
+  if (totals.size() < 2) return std::nullopt;
+
+  const auto& prev = totals[totals.size() - 2];
+  const auto& cur = totals[totals.size() - 1];
+
+  PeriodComparison c;
+  c.previous = prev;
+  c.current = cur;
+  c.delta_expense = cur.expense - prev.expense;
+  if (prev.expense > 0.0) c.percent_change = (c.delta_expense / prev.expense) * 100.0;
+  c.money_saved = (c.delta_expense < 0.0) ? (-c.delta_expense) : 0.0;
+  c.extra_spending = (c.delta_expense > 0.0) ? (c.delta_expense) : 0.0;
+  return c;
+}
+
+
+
+====================================================================================================
+FILE: src/core/AIAdvisor.h
+====================================================================================================
+
+#pragma once
+
+#include "core/ExpenseTracker.h"
+
+#include <string>
+#include <vector>
+
+struct AIForecast {
+  double next_week_expense{0.0};
+  double next_month_expense{0.0};
+};
+
+struct AIAdvice {
+  std::vector<std::string> alerts;
+  std::vector<std::string> suggestions;
+  AIForecast forecast;
+};
+
+class AIAdvisor {
+public:
+  // "AI" here is offline, deterministic logic:
+  // - detects category concentration
+  // - compares latest periods
+  // - predicts next week/month via moving average
+  static AIAdvice analyze(const ExpenseTracker& tracker);
+};
+
+
+
+====================================================================================================
+FILE: src/core/AIAdvisor.cpp
+====================================================================================================
+
+#include "core/AIAdvisor.h"
+
+#include "core/Analytics.h"
+
+#include <algorithm>
+#include <cmath>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+static std::string money(double v, const char* currency = "₹") {
+  std::ostringstream oss;
+  oss.setf(std::ios::fixed);
+  oss.precision(0);
+  oss << currency << std::round(v);
+  return oss.str();
+}
+
+AIAdvice AIAdvisor::analyze(const ExpenseTracker& tracker) {
+  AIAdvice out;
+  const auto sum = tracker.summary();
+  const auto byCat = tracker.expenseByCategory();
+
+  // Highest category alert
+  if (auto hi = tracker.highestSpendingCategory()) {
+    const auto& [cat, amt] = *hi;
+    if (sum.total_expense > 0.0) {
+      const double pct = (amt / sum.total_expense) * 100.0;
+      if (pct >= 30.0) {
+        std::ostringstream oss;
+        oss.setf(std::ios::fixed);
+        oss.precision(0);
+        oss << "Reduce " << cat << " spending by 20% (it is ~" << pct << "% of your expenses).";
+        out.alerts.push_back(oss.str());
+      }
+    }
+  }
+
+  // Budget-style suggestions for students
+  if (sum.total_income > 0.0 && sum.total_expense > 0.0) {
+    const double savingsRate = (sum.total_income - sum.total_expense) / sum.total_income;
+    if (savingsRate < 0.10) {
+      out.suggestions.push_back("Try a simple student rule: save at least 10% of income first.");
+    } else if (savingsRate > 0.25) {
+      out.suggestions.push_back("Nice! You're saving >25%. Consider investing part of the surplus.");
+    }
+  }
+
+  // Weekly & monthly comparisons -> alerts
+  if (auto cmpW = Analytics::compareLatestTwoPeriods(tracker.transactions(), Period::Week)) {
+    if (cmpW->money_saved > 0.0) {
+      out.alerts.push_back("You saved " + money(cmpW->money_saved) + " this week.");
+    } else if (cmpW->extra_spending > 0.0) {
+      std::ostringstream oss;
+      oss.setf(std::ios::fixed);
+      oss.precision(0);
+      oss << "You spent " << money(cmpW->extra_spending) << " extra this week ("
+          << std::abs(cmpW->percent_change) << "% increase).";
+      out.alerts.push_back(oss.str());
+    }
+  }
+
+  if (auto cmpM = Analytics::compareLatestTwoPeriods(tracker.transactions(), Period::Month)) {
+    if (cmpM->extra_spending > 0.0 && std::abs(cmpM->percent_change) >= 15.0) {
+      out.alerts.push_back("Monthly spending jumped. Review your top categories and set limits.");
+    }
+  }
+
+  // Forecast: moving average of last N periods
+  {
+    const auto weekTotals = Analytics::totalsByPeriod(tracker.transactions(), Period::Week);
+    const int N = 4;
+    if (!weekTotals.empty()) {
+      double acc = 0.0;
+      int count = 0;
+      for (int i = static_cast<int>(weekTotals.size()) - 1; i >= 0 && count < N; --i, ++count)
+        acc += weekTotals[static_cast<std::size_t>(i)].expense;
+      out.forecast.next_week_expense = (count > 0) ? (acc / count) : 0.0;
+    }
+  }
+  {
+    const auto monthTotals = Analytics::totalsByPeriod(tracker.transactions(), Period::Month);
+    const int N = 3;
+    if (!monthTotals.empty()) {
+      double acc = 0.0;
+      int count = 0;
+      for (int i = static_cast<int>(monthTotals.size()) - 1; i >= 0 && count < N; --i, ++count)
+        acc += monthTotals[static_cast<std::size_t>(i)].expense;
+      out.forecast.next_month_expense = (count > 0) ? (acc / count) : 0.0;
+    }
+  }
+
+  // Category-level nudges
+  if (!byCat.empty()) {
+    // Sort categories by spend
+    std::vector<std::pair<std::string, double>> cats(byCat.begin(), byCat.end());
+    std::sort(cats.begin(), cats.end(),
+              [](const auto& a, const auto& b) { return a.second > b.second; });
+
+    const int topK = std::min<int>(3, static_cast<int>(cats.size()));
+    for (int i = 0; i < topK; ++i) {
+      const auto& [cat, amt] = cats[static_cast<std::size_t>(i)];
+      if (amt <= 0.0) continue;
+      out.suggestions.push_back("Set a weekly cap for " + cat + " (last total: " + money(amt) +
+                                ").");
+    }
+  } else {
+    out.suggestions.push_back("Add a few expenses to unlock category charts and AI insights.");
+  }
+
+  if (out.alerts.empty()) out.alerts.push_back("No alerts right now. Keep tracking regularly.");
+  return out;
+}
+
+
+
+====================================================================================================
+FILE: src/core/FileStorage.h
+====================================================================================================
+
+#pragma once
+
+#include <optional>
+#include <string>
+#include <vector>
+
+#include "core/Transaction.h"
+
+struct StoredUser {
+  std::string username;
+  std::string password_hash;
+};
+
+class FileStorage {
+public:
+  static std::string dataDir(); // creates if missing
+
+  static std::string usersFilePath();
+  static std::vector<StoredUser> loadUsers();
+  static bool saveUsers(const std::vector<StoredUser>& users);
+
+  static std::string transactionsFilePathFor(const std::string& username);
+  static std::vector<Transaction> loadTransactions(const std::string& username);
+  static bool saveTransactions(const std::string& username, const std::vector<Transaction>& txs);
+
+  static std::string hashPassword(const std::string& username, const std::string& password);
+};
+
+
+
+====================================================================================================
+FILE: src/core/FileStorage.cpp
+====================================================================================================
+
+#include "core/FileStorage.h"
+
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+static std::vector<std::string> split(const std::string& s, char delim) {
+  std::vector<std::string> out;
+  std::string cur;
+  for (char c : s) {
+    if (c == delim) {
+      out.push_back(cur);
+      cur.clear();
+    } else {
+      cur.push_back(c);
+    }
+  }
+  out.push_back(cur);
+  return out;
+}
+
+std::string FileStorage::dataDir() {
+  // Store data beside the executable's working directory.
+  const std::filesystem::path p = std::filesystem::current_path() / "data";
+  std::error_code ec;
+  std::filesystem::create_directories(p, ec);
+  return p.string();
+}
+
+std::string FileStorage::usersFilePath() {
+  return (std::filesystem::path(dataDir()) / "users.txt").string();
+}
+
+std::vector<StoredUser> FileStorage::loadUsers() {
+  std::vector<StoredUser> users;
+  std::ifstream in(usersFilePath());
+  if (!in) return users;
+
+  std::string line;
+  while (std::getline(in, line)) {
+    if (line.empty()) continue;
+    const auto parts = split(line, '|');
+    if (parts.size() < 2) continue;
+    users.push_back(StoredUser{parts[0], parts[1]});
+  }
+  return users;
+}
+
+bool FileStorage::saveUsers(const std::vector<StoredUser>& users) {
+  std::ofstream out(usersFilePath(), std::ios::trunc);
+  if (!out) return false;
+  for (const auto& u : users) {
+    out << u.username << "|" << u.password_hash << "\n";
+  }
+  return true;
+}
+
+std::string FileStorage::transactionsFilePathFor(const std::string& username) {
+  return (std::filesystem::path(dataDir()) / (username + "_transactions.csv")).string();
+}
+
+std::vector<Transaction> FileStorage::loadTransactions(const std::string& username) {
+  std::vector<Transaction> txs;
+  std::ifstream in(transactionsFilePathFor(username));
+  if (!in) return txs;
+
+  std::string line;
+  while (std::getline(in, line)) {
+    if (line.empty()) continue;
+    if (auto t = Transaction::fromCsvRow(line)) txs.push_back(*t);
+  }
+  return txs;
+}
+
+bool FileStorage::saveTransactions(const std::string& username,
+                                   const std::vector<Transaction>& txs) {
+  std::ofstream out(transactionsFilePathFor(username), std::ios::trunc);
+  if (!out) return false;
+  for (const auto& t : txs) out << t.toCsvRow() << "\n";
+  return true;
+}
+
+std::string FileStorage::hashPassword(const std::string& username, const std::string& password) {
+  // Not cryptographically secure; better than plaintext for a college project.
+  const std::string salt = "expense-tracker-salt-v1";
+  const std::string payload = username + "|" + password + "|" + salt;
+  const std::size_t h = std::hash<std::string>{}(payload);
+  std::ostringstream oss;
+  oss << std::hex << h;
+  return oss.str();
+}
+
+
+
+====================================================================================================
+FILE: CMakeLists.txt
+====================================================================================================
+
+cmake_minimum_required(VERSION 3.27)
+
+project(ExpenseTracker
+  VERSION 1.0.0
+  LANGUAGES CXX
+)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+option(BUILD_CPP_WEB "Build Drogon C++ web server" ON)
+
+# Prefer already-downloaded sources (offline-friendly)
+set(_local_deps_dir "${CMAKE_CURRENT_SOURCE_DIR}/build/_deps")
+
+# SFML (windowing + graphics)
+if(EXISTS "${_local_deps_dir}/sfml-src/CMakeLists.txt")
+  FetchContent_Declare(SFML SOURCE_DIR "${_local_deps_dir}/sfml-src")
+else()
+  FetchContent_Declare(
+    SFML
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 2.6.1
+  )
+endif()
+set(SFML_BUILD_AUDIO OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_NETWORK OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(SFML)
+
+# Dear ImGui + ImGui-SFML
+if(EXISTS "${_local_deps_dir}/imgui-src/CMakeLists.txt")
+  FetchContent_Declare(imgui SOURCE_DIR "${_local_deps_dir}/imgui-src")
+else()
+  FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+    GIT_TAG v1.91.5
+  )
+endif()
+
+if(EXISTS "${_local_deps_dir}/imgui_sfml-src/CMakeLists.txt")
+  FetchContent_Declare(imgui_sfml SOURCE_DIR "${_local_deps_dir}/imgui_sfml-src")
+elseif(EXISTS "${_local_deps_dir}/imguisfml-src/CMakeLists.txt")
+  FetchContent_Declare(imgui_sfml SOURCE_DIR "${_local_deps_dir}/imguisfml-src")
+else()
+  FetchContent_Declare(
+    imgui_sfml
+    GIT_REPOSITORY https://github.com/SFML/imgui-sfml.git
+    GIT_TAG v2.6
+  )
+endif()
+FetchContent_MakeAvailable(imgui imgui_sfml)
+
+if(BUILD_CPP_WEB)
+  if(EXISTS "${_local_deps_dir}/drogon-src/CMakeLists.txt")
+    FetchContent_Declare(drogon SOURCE_DIR "${_local_deps_dir}/drogon-src")
+  else()
+    FetchContent_Declare(
+      drogon
+      GIT_REPOSITORY https://github.com/drogonframework/drogon.git
+      GIT_TAG v1.9.9
+    )
+  endif()
+  set(BUILD_CTL OFF CACHE BOOL "" FORCE)
+  set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set(BUILD_ORM OFF CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(drogon)
+endif()
+
+add_executable(expense_tracker
+  src/main.cpp
+  src/core/User.cpp
+  src/core/Transaction.cpp
+  src/core/ExpenseTracker.cpp
+  src/core/Analytics.cpp
+  src/core/AIAdvisor.cpp
+  src/core/FileStorage.cpp
+  src/ui/App.cpp
+)
+
+target_include_directories(expense_tracker PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_link_libraries(expense_tracker PRIVATE
+  sfml-graphics
+  sfml-window
+  sfml-system
+  ImGui-SFML::ImGui-SFML
+)
+
+if(MSVC)
+  target_compile_options(expense_tracker PRIVATE /W4 /permissive-)
+else()
+  target_compile_options(expense_tracker PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+if(BUILD_CPP_WEB)
+  add_executable(expense_tracker_web
+    server/main.cc
+    server/WebController.cc
+    server/AppService.cc
+    src/core/User.cpp
+    src/core/Transaction.cpp
+    src/core/ExpenseTracker.cpp
+    src/core/Analytics.cpp
+    src/core/AIAdvisor.cpp
+    src/core/FileStorage.cpp
+  )
+
+  target_include_directories(expense_tracker_web PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/server
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+  )
+
+  target_link_libraries(expense_tracker_web PRIVATE
+    Drogon::Drogon
+  )
+
+  if(MSVC)
+    target_compile_options(expense_tracker_web PRIVATE /W4 /permissive-)
+  else()
+    target_compile_options(expense_tracker_web PRIVATE -Wall -Wextra -Wpedantic)
+  endif()
+endif()
+
+
+
+====================================================================================================
+FILE: README.md
+====================================================================================================
+
+## Expense Tracker (Full C++ Migration)
+
+This project now includes a **full C++ web application** using **Drogon**:
+- C++ controllers/routes
+- C++ services for auth/transactions/reports/AI/salary/bank
+- C++-rendered HTML pages (no dependency on `web/app.js` logic)
+
+The original C++ desktop GUI (SFML + ImGui) and previous web/electron experiments are still present for reference, but the new migration target is the Drogon app.
+
+### Features
+- **User authentication**: Register/Login stored in `data/users.txt`
+- **Per-user storage**: Each user has `data/<username>_transactions.csv`
+- **Transactions**: Add, view, delete (income/expense)
+- **Balance sheet**: total income, total expense, net balance + category breakdown + highlight highest spending
+- **Time analysis**: weekly/monthly/yearly comparisons with % change and saved/extra spending
+- **AI Advisor**: pattern insights, saving suggestions, next week/month predictions, and smart alerts
+- **Charts**: Pie charts + bar charts (drawn directly in ImGui)
+
+### Build C++ Drogon Web App (Windows)
+Prereqs:
+- **CMake** (3.27+)
+- **Visual Studio 2022 Build Tools** (or VS 2022) with C++ workload
+- **Git** (FetchContent downloads dependencies)
+
+Build & run:
+
+```bash
+cmake -S . -B build_web -DBUILD_CPP_WEB=ON
+cmake --build build_web --config Release --target expense_tracker_web
+.\build_web\Release\expense_tracker_web.exe
+```
+
+Open:
+- `http://localhost:8080`
+
+### Demo Logins (Seeded by C++)
+- `student_2yr` / `demo1234`
+- `student_3yr` / `demo3456` (pre-connected to demo Axis bank)
+
+### Notes
+- Data is stored in local files under `data/` (auto-created).
+- The app seeds demo users on startup if missing.
+- Legacy targets still exist (`expense_tracker` desktop GUI, `web/`, `desktop/`).
+
+---
+
+## Web Version (Preview in Browser)
+
+I also included a **pure website** version in `web/` (HTML/CSS/JS) with the same features:
+auth, per-user transactions, analytics, charts, and AI-style suggestions. It runs instantly
+with a local server (no compilation).
+
+Run a preview server:
+
+```bash
+cd web
+python -m http.server 5173
+```
+
+Open:
+- `http://localhost:5173`
+
+---
+
+## Desktop App Version (Electron)
+
+This wraps the `web/` website into a **desktop app** (Windows/macOS/Linux) using Electron.
+
+### Run as an app (Windows)
+Prereqs:
+- **Node.js LTS** (install from `https://nodejs.org`)
+
+Commands:
+
+```bash
+cd desktop
+npm install
+npm start
+```
+
+### Build a Windows installer (.exe)
+
+```bash
+cd desktop
+npm install
+npm run dist
+```
+
+The installer will be created under `desktop/dist/`.
+
+
+
+
