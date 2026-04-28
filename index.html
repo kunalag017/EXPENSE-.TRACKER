@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker (College Edition)</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">ET</div>
+          <div>
+            <div class="title">Expense Tracker</div>
+            <div class="subtitle">College Edition · Analytics + AI Suggestions</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div id="userBadge" class="badge hidden"></div>
+          <button id="logoutBtn" class="btn btn-ghost hidden" type="button">Logout</button>
+        </div>
+      </header>
+
+      <main class="shell">
+        <aside class="sidebar">
+          <nav class="nav">
+            <button class="nav-item active" data-route="home">
+              <span class="nav-icon">🏠</span><span>Home</span>
+            </button>
+            <button class="nav-item" data-route="add">
+              <span class="nav-icon">➕</span><span>Add Expense</span>
+            </button>
+            <button class="nav-item" data-route="reports">
+              <span class="nav-icon">📊</span><span>Reports</span>
+            </button>
+            <button class="nav-item" data-route="ai">
+              <span class="nav-icon">🤖</span><span>AI Suggestions</span>
+            </button>
+            <button id="bankBtn" class="nav-item" type="button">
+              <span class="nav-icon">🏦</span><span>Connect Bank</span>
+            </button>
+          </nav>
+          <div class="sidebar-footer">
+            <div class="hint">
+              Data is stored locally in your browser (per user).
+            </div>
+          </div>
+        </aside>
+
+        <section class="content">
+          <!-- AUTH -->
+          <section id="authView" class="view">
+            <div class="card auth-card">
+              <h2 id="authTitle">Login</h2>
+              <p class="muted">Create an account to keep your transactions separate.</p>
+              <div class="grid">
+                <label>
+                  <span>Username</span>
+                  <input id="authUsername" type="text" placeholder="e.g. rahul_07" />
+                </label>
+                <label>
+                  <span>Password</span>
+                  <input id="authPassword" type="password" placeholder="min 4 characters" />
+                </label>
+              </div>
+              <div id="authError" class="error hidden"></div>
+              <div class="row">
+                <button id="authSubmit" class="btn btn-primary" type="button">Login</button>
+                <button id="authToggle" class="btn btn-ghost" type="button">New here? Register</button>
+              </div>
+              <div class="small muted">
+                Credentials are stored in browser storage (demo mode). For a real multi-device website,
+                add a backend API.
+              </div>
+            </div>
+          </section>
+
+          <!-- HOME -->
+          <section id="homeView" class="view home-theme hidden">
+            <div class="home-glow" aria-hidden="true"></div>
+            <div class="row between">
+              <h2>Dashboard</h2>
+              <div class="muted small">Tip: Add expenses daily to get better forecasts.</div>
+            </div>
+
+            <div class="card" style="margin-top: 14px;">
+              <div class="row between" style="margin-top: 0;">
+                <div class="card-title">Quick Add Expense</div>
+                <button id="goToAddPage" class="btn btn-ghost small" type="button">Open full form</button>
+              </div>
+              <div class="grid-2">
+                <label>
+                  <span>Type</span>
+                  <div class="seg">
+                    <button id="qTypeIncome" class="seg-btn" type="button">Income</button>
+                    <button id="qTypeExpense" class="seg-btn active" type="button">Expense</button>
+                  </div>
+                </label>
+                <label>
+                  <span>Date</span>
+                  <input id="qDate" type="date" />
+                </label>
+                <label>
+                  <span>Amount (₹)</span>
+                  <input id="qAmount" type="number" min="0" step="0.01" placeholder="e.g. 120" />
+                </label>
+                <label>
+                  <span>Category</span>
+                  <input id="qCategory" type="text" placeholder="Food, Rent, Travel, Books..." />
+                </label>
+                <label class="span-2">
+                  <span>Note</span>
+                  <input id="qNote" type="text" placeholder="Optional" />
+                </label>
+              </div>
+              <div id="qError" class="error hidden"></div>
+              <div class="row">
+                <button id="qAddSubmit" class="btn btn-primary" type="button">Add</button>
+                <button id="qClear" class="btn btn-ghost" type="button">Clear</button>
+              </div>
+            </div>
+
+            <div class="row between" style="margin-top: 10px;">
+              <div class="muted small">Salary summary</div>
+              <div class="row" style="margin-top: 0; flex-wrap: wrap; justify-content: flex-end;">
+                <label style="display:flex; align-items:center; gap:8px;">
+                  <span class="muted small">Salary category</span>
+                  <input id="salaryCategory" type="text" style="width:160px;" placeholder="Salary" />
+                </label>
+                <button id="saveSalaryCategory" class="btn btn-ghost small" type="button">Save</button>
+                <label style="display:flex; align-items:center; gap:8px;">
+                  <span class="muted small">Recurring amount</span>
+                  <input id="salaryRecurringAmount" type="number" min="0" step="0.01" style="width:140px;" placeholder="e.g. 25000" />
+                </label>
+                <label style="display:flex; align-items:center; gap:8px;">
+                  <span class="muted small">Payout day</span>
+                  <input id="salaryRecurringDay" type="number" min="1" max="28" style="width:80px;" placeholder="1" />
+                </label>
+                <button id="saveRecurringSalary" class="btn btn-primary small" type="button">Set recurring salary</button>
+              </div>
+            </div>
+            <div id="salaryRecurringMsg" class="muted small" style="margin-top: 6px;"></div>
+
+            <div class="cards">
+              <div class="card stat">
+                <div class="stat-label green">Total Income</div>
+                <div id="statIncome" class="stat-value green">₹0</div>
+              </div>
+              <div class="card stat">
+                <div class="stat-label red">Total Expense</div>
+                <div id="statExpense" class="stat-value red">₹0</div>
+              </div>
+              <div class="card stat">
+                <div class="stat-label blue">Net Balance</div>
+                <div id="statBalance" class="stat-value">₹0</div>
+              </div>
+              <div class="card stat">
+                <div class="stat-label amber">Highest Spend</div>
+                <div id="statHighest" class="stat-value">—</div>
+              </div>
+              <div class="card stat">
+                <div class="stat-label blue">Salary (only)</div>
+                <div id="statSalary" class="stat-value">₹0</div>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-title">Category Distribution (Pie)</div>
+                <canvas id="pieCategories" width="400" height="220"></canvas>
+                <div id="pieCategoriesLegend" class="legend"></div>
+              </div>
+              <div class="card">
+                <div class="card-title">Income vs Expense (Pie)</div>
+                <canvas id="pieIncomeExpense" width="400" height="220"></canvas>
+                <div id="pieIncomeExpenseLegend" class="legend"></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="row between">
+                <div class="card-title">Recent Transactions</div>
+                <div class="muted small">Delete from the right</div>
+              </div>
+              <div class="table-wrap">
+                <table class="table tx-table" aria-label="Transactions">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Type</th>
+                      <th>Category</th>
+                      <th class="right">Amount</th>
+                      <th>Note</th>
+                      <th class="right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="txTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ADD -->
+          <section id="addView" class="view hidden">
+            <h2>Add Transaction</h2>
+            <div class="card">
+              <div class="grid-2">
+                <label>
+                  <span>Type</span>
+                  <div class="seg">
+                    <button id="typeIncome" class="seg-btn" type="button">Income</button>
+                    <button id="typeExpense" class="seg-btn active" type="button">Expense</button>
+                  </div>
+                </label>
+                <label>
+                  <span>Date</span>
+                  <input id="txDate" type="date" />
+                </label>
+                <label>
+                  <span>Amount (₹)</span>
+                  <input id="txAmount" type="number" min="0" step="0.01" placeholder="e.g. 120" />
+                </label>
+                <label>
+                  <span>Category</span>
+                  <input id="txCategory" type="text" placeholder="Food, Rent, Travel, Books..." />
+                </label>
+                <label class="span-2">
+                  <span>Note</span>
+                  <input id="txNote" type="text" placeholder="Optional" />
+                </label>
+              </div>
+              <div id="addError" class="error hidden"></div>
+              <div class="row">
+                <button id="addSubmit" class="btn btn-primary" type="button">Add</button>
+                <button id="addClear" class="btn btn-ghost" type="button">Clear</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- REPORTS -->
+          <section id="reportsView" class="view hidden">
+            <div class="row between" style="margin-top: 0;">
+              <h2>Reports</h2>
+              <div class="muted small">Compare your latest periods and spot overspending quickly.</div>
+            </div>
+            <div class="grid-3">
+              <div class="card">
+                <div class="card-title">Weekly Comparison</div>
+                <div id="weeklyCmp" class="report"></div>
+              </div>
+              <div class="card">
+                <div class="card-title">Monthly Comparison</div>
+                <div id="monthlyCmp" class="report"></div>
+              </div>
+              <div class="card">
+                <div class="card-title">Yearly Comparison</div>
+                <div id="yearlyCmp" class="report"></div>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-title">Weekly Expenses (Bar)</div>
+                <canvas id="barWeekly" width="500" height="260"></canvas>
+              </div>
+              <div class="card">
+                <div class="card-title">Monthly Expenses (Bar)</div>
+                <canvas id="barMonthly" width="500" height="260"></canvas>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 14px;">
+              <div class="row between" style="margin-top: 0;">
+                <div class="card-title">Last Periods (Quick Table)</div>
+                <div class="muted small">Shows totals by period (income/expense/net)</div>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <div class="muted small" style="margin-bottom: 8px;">Weekly (last 6)</div>
+                  <div class="table-wrap">
+                    <table class="table" aria-label="Weekly totals">
+                      <thead>
+                        <tr>
+                          <th>Week</th>
+                          <th class="right">Income</th>
+                          <th class="right">Expense</th>
+                          <th class="right">Net</th>
+                        </tr>
+                      </thead>
+                      <tbody id="weeklyTotalsBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div>
+                  <div class="muted small" style="margin-bottom: 8px;">Monthly (last 6)</div>
+                  <div class="table-wrap">
+                    <table class="table" aria-label="Monthly totals">
+                      <thead>
+                        <tr>
+                          <th>Month</th>
+                          <th class="right">Income</th>
+                          <th class="right">Expense</th>
+                          <th class="right">Net</th>
+                        </tr>
+                      </thead>
+                      <tbody id="monthlyTotalsBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- AI -->
+          <section id="aiView" class="view hidden">
+            <div class="row between">
+              <h2>AI Suggestions</h2>
+              <button id="aiRefresh" class="btn btn-ghost" type="button">Refresh</button>
+            </div>
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-title amber">Alerts</div>
+                <ul id="aiAlerts" class="list"></ul>
+              </div>
+              <div class="card">
+                <div class="card-title green">Suggestions</div>
+                <ul id="aiSuggestions" class="list"></ul>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title blue">Predictions</div>
+              <div id="aiForecast" class="forecast"></div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <!-- BANK MODAL -->
+    <div id="bankModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Connect bank account">
+      <div class="modal-backdrop" id="bankCloseBackdrop"></div>
+      <div class="modal-card">
+        <div class="row between" style="margin-top:0;">
+          <div>
+            <div class="card-title">Connect Bank Account</div>
+            <div class="muted small">Demo mode (no real bank login). Use the demo account or import bank details.</div>
+          </div>
+          <div class="row" style="margin-top:0;">
+            <button id="bankDetailsToggle" class="btn btn-ghost" type="button">Import details</button>
+            <button id="bankCloseX" class="btn btn-ghost" type="button">Close</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <div class="row between" style="margin-top:0;">
+            <div>
+              <div class="muted small">Status</div>
+              <div id="bankStatus" style="font-weight:800;">Not connected</div>
+            </div>
+            <div class="row" style="margin-top:0;">
+              <button id="bankDisconnect" class="btn btn-ghost" type="button">Disconnect</button>
+            </div>
+          </div>
+          <div id="bankMsg" class="muted small" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="grid-2" style="margin-top:12px;">
+          <div class="card">
+            <div class="card-title">Connect a Bank</div>
+            <div class="muted small" style="line-height:1.6;">
+              Choose your bank. For true live sync/login, a backend + Account Aggregator/Bank API is required.
+              For now, you can still import statements/transactions below.
+            </div>
+            <div class="bank-grid" role="list">
+              <button class="bank-tile bank-choice" role="listitem" data-bank="HDFC" type="button">
+                <img class="bank-logo" src="./assets/hdfc.webp" alt="HDFC Bank" />
+                <span class="bank-name">HDFC</span>
+              </button>
+              <button class="bank-tile bank-choice" role="listitem" data-bank="ICICI" type="button">
+                <img class="bank-logo" src="./assets/icici.webp" alt="ICICI Bank" />
+                <span class="bank-name">ICICI</span>
+              </button>
+              <button class="bank-tile bank-choice" role="listitem" data-bank="Axis" type="button">
+                <img class="bank-logo" src="./assets/axis.webp" alt="Axis Bank" />
+                <span class="bank-name">Axis</span>
+              </button>
+              <button class="bank-tile bank-choice" role="listitem" data-bank="YES Bank" type="button">
+                <img class="bank-logo" src="./assets/yesbank.png" alt="YES Bank" />
+                <span class="bank-name">YES Bank</span>
+              </button>
+            </div>
+            <div class="row">
+              <button id="bankConnectReal" class="btn btn-primary" type="button">Connect selected bank</button>
+            </div>
+            <div class="small muted" style="margin-top:8px;">
+              Live sync placeholder: stores selected bank for this user.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Connection info</div>
+            <div class="muted small" style="line-height:1.6;">
+              After connecting, you can import transactions (CSV) below to populate your dashboard.
+              For real bank sync, this UI would redirect to a secure consent/login page.
+            </div>
+          </div>
+        </div>
+
+        <div id="bankDetailsPanel" class="bank-details-panel hidden">
+          <div class="row between" style="margin-top:0;">
+            <div class="card-title">Import bank account details</div>
+            <button id="bankDetailsClose" class="btn btn-ghost" type="button">Close</button>
+          </div>
+          <div class="muted small" style="line-height:1.6; margin-top: 6px;">
+            Upload JSON or CSV to store bank details (display only).<br />
+            JSON example:
+            <span class="mono">{"bank_name":"SBI","account_holder":"Name","account_last4":"7788","ifsc":"SBIN0000123"}</span>
+          </div>
+          <div class="row" style="margin-top: 10px;">
+            <input id="bankDetailsFile" type="file" accept=".json,.csv,application/json,text/csv" />
+            <button id="bankDetailsImport" class="btn btn-primary" type="button">Import</button>
+          </div>
+          <div id="bankDetailsError" class="error hidden"></div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <div class="card-title">Import Bank Transactions (CSV)</div>
+          <div class="muted small" style="line-height:1.5;">
+            CSV columns supported:
+            <b>date</b> (YYYY-MM-DD), <b>description</b>, <b>amount</b> (negative = expense, positive = income).
+            Example: <span class="mono">2026-04-01,Swiggy,-220</span>
+          </div>
+          <div class="row">
+            <input id="bankCsv" type="file" accept=".csv,text/csv" />
+            <button id="bankImport" class="btn btn-primary" type="button">Import</button>
+            <button id="bankSimulate" class="btn btn-ghost" type="button">Simulate last 30 days</button>
+          </div>
+          <div id="bankImportError" class="error hidden"></div>
+        </div>
+
+        <div class="small muted" style="margin-top:10px;">
+          Want real bank connectivity? That requires a backend + provider (Plaid/TrueLayer) and OAuth flows.
+        </div>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+
