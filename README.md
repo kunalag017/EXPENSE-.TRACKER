@@ -7,452 +7,56 @@ FILE: index.html
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Expense Tracker (College Edition)</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <div id="app">
-      <header class="topbar">
-        <div class="brand">
-          <div class="logo">ET</div>
-          <div>
-            <div class="title">Expense Tracker</div>
-            <div class="subtitle">College Edition · Analytics + AI Suggestions</div>
-          </div>
-        </div>
-        <div class="topbar-right">
-          <div id="userBadge" class="badge hidden"></div>
-          <button id="logoutBtn" class="btn btn-ghost hidden" type="button">Logout</button>
-        </div>
-      </header>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div class="app">
 
-      <main class="shell">
-        <aside class="sidebar">
-          <nav class="nav">
-            <button class="nav-item active" data-route="home">
-              <span class="nav-icon">🏠</span><span>Home</span>
-            </button>
-            <button class="nav-item" data-route="add">
-              <span class="nav-icon">➕</span><span>Add Expense</span>
-            </button>
-            <button class="nav-item" data-route="reports">
-              <span class="nav-icon">📊</span><span>Reports</span>
-            </button>
-            <button class="nav-item" data-route="ai">
-              <span class="nav-icon">🤖</span><span>AI Suggestions</span>
-            </button>
-            <button id="bankBtn" class="nav-item" type="button">
-              <span class="nav-icon">🏦</span><span>Connect Bank</span>
-            </button>
-          </nav>
-          <div class="sidebar-footer">
-            <div class="hint">
-              Data is stored locally in your browser (per user).
-            </div>
-          </div>
-        </aside>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">ET</div>
+    <div>
+      <h2>Expense Tracker</h2>
+      <p>Analytics + AI</p>
+    </div>
+  </div>
 
-        <section class="content">
-          <!-- AUTH -->
-          <section id="authView" class="view">
-            <div class="card auth-card">
-              <h2 id="authTitle">Login</h2>
-              <p class="muted">Create an account to keep your transactions separate.</p>
-              <div class="grid">
-                <label>
-                  <span>Username</span>
-                  <input id="authUsername" type="text" placeholder="e.g. rahul_07" />
-                </label>
-                <label>
-                  <span>Password</span>
-                  <input id="authPassword" type="password" placeholder="min 4 characters" />
-                </label>
-              </div>
-              <div id="authError" class="error hidden"></div>
-              <div class="row">
-                <button id="authSubmit" class="btn btn-primary" type="button">Login</button>
-                <button id="authToggle" class="btn btn-ghost" type="button">New here? Register</button>
-              </div>
-              <div class="small muted">
-                Credentials are stored in browser storage (demo mode). For a real multi-device website,
-                add a backend API.
-              </div>
-            </div>
-          </section>
+  <!-- DASHBOARD -->
+  <div class="content">
 
-          <!-- HOME -->
-          <section id="homeView" class="view home-theme hidden">
-            <div class="home-glow" aria-hidden="true"></div>
-            <div class="row between">
-              <h2>Dashboard</h2>
-              <div class="muted small">Tip: Add expenses daily to get better forecasts.</div>
-            </div>
-
-            <div class="card" style="margin-top: 14px;">
-              <div class="row between" style="margin-top: 0;">
-                <div class="card-title">Quick Add Expense</div>
-                <button id="goToAddPage" class="btn btn-ghost small" type="button">Open full form</button>
-              </div>
-              <div class="grid-2">
-                <label>
-                  <span>Type</span>
-                  <div class="seg">
-                    <button id="qTypeIncome" class="seg-btn" type="button">Income</button>
-                    <button id="qTypeExpense" class="seg-btn active" type="button">Expense</button>
-                  </div>
-                </label>
-                <label>
-                  <span>Date</span>
-                  <input id="qDate" type="date" />
-                </label>
-                <label>
-                  <span>Amount (₹)</span>
-                  <input id="qAmount" type="number" min="0" step="0.01" placeholder="e.g. 120" />
-                </label>
-                <label>
-                  <span>Category</span>
-                  <input id="qCategory" type="text" placeholder="Food, Rent, Travel, Books..." />
-                </label>
-                <label class="span-2">
-                  <span>Note</span>
-                  <input id="qNote" type="text" placeholder="Optional" />
-                </label>
-              </div>
-              <div id="qError" class="error hidden"></div>
-              <div class="row">
-                <button id="qAddSubmit" class="btn btn-primary" type="button">Add</button>
-                <button id="qClear" class="btn btn-ghost" type="button">Clear</button>
-              </div>
-            </div>
-
-            <div class="row between" style="margin-top: 10px;">
-              <div class="muted small">Salary summary</div>
-              <div class="row" style="margin-top: 0; flex-wrap: wrap; justify-content: flex-end;">
-                <label style="display:flex; align-items:center; gap:8px;">
-                  <span class="muted small">Salary category</span>
-                  <input id="salaryCategory" type="text" style="width:160px;" placeholder="Salary" />
-                </label>
-                <button id="saveSalaryCategory" class="btn btn-ghost small" type="button">Save</button>
-                <label style="display:flex; align-items:center; gap:8px;">
-                  <span class="muted small">Recurring amount</span>
-                  <input id="salaryRecurringAmount" type="number" min="0" step="0.01" style="width:140px;" placeholder="e.g. 25000" />
-                </label>
-                <label style="display:flex; align-items:center; gap:8px;">
-                  <span class="muted small">Payout day</span>
-                  <input id="salaryRecurringDay" type="number" min="1" max="28" style="width:80px;" placeholder="1" />
-                </label>
-                <button id="saveRecurringSalary" class="btn btn-primary small" type="button">Set recurring salary</button>
-              </div>
-            </div>
-            <div id="salaryRecurringMsg" class="muted small" style="margin-top: 6px;"></div>
-
-            <div class="cards">
-              <div class="card stat">
-                <div class="stat-label green">Total Income</div>
-                <div id="statIncome" class="stat-value green">₹0</div>
-              </div>
-              <div class="card stat">
-                <div class="stat-label red">Total Expense</div>
-                <div id="statExpense" class="stat-value red">₹0</div>
-              </div>
-              <div class="card stat">
-                <div class="stat-label blue">Net Balance</div>
-                <div id="statBalance" class="stat-value">₹0</div>
-              </div>
-              <div class="card stat">
-                <div class="stat-label amber">Highest Spend</div>
-                <div id="statHighest" class="stat-value">—</div>
-              </div>
-              <div class="card stat">
-                <div class="stat-label blue">Salary (only)</div>
-                <div id="statSalary" class="stat-value">₹0</div>
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="card">
-                <div class="card-title">Category Distribution (Pie)</div>
-                <canvas id="pieCategories" width="400" height="220"></canvas>
-                <div id="pieCategoriesLegend" class="legend"></div>
-              </div>
-              <div class="card">
-                <div class="card-title">Income vs Expense (Pie)</div>
-                <canvas id="pieIncomeExpense" width="400" height="220"></canvas>
-                <div id="pieIncomeExpenseLegend" class="legend"></div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="row between">
-                <div class="card-title">Recent Transactions</div>
-                <div class="muted small">Delete from the right</div>
-              </div>
-              <div class="table-wrap">
-                <table class="table tx-table" aria-label="Transactions">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Type</th>
-                      <th>Category</th>
-                      <th class="right">Amount</th>
-                      <th>Note</th>
-                      <th class="right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="txTableBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-
-          <!-- ADD -->
-          <section id="addView" class="view hidden">
-            <h2>Add Transaction</h2>
-            <div class="card">
-              <div class="grid-2">
-                <label>
-                  <span>Type</span>
-                  <div class="seg">
-                    <button id="typeIncome" class="seg-btn" type="button">Income</button>
-                    <button id="typeExpense" class="seg-btn active" type="button">Expense</button>
-                  </div>
-                </label>
-                <label>
-                  <span>Date</span>
-                  <input id="txDate" type="date" />
-                </label>
-                <label>
-                  <span>Amount (₹)</span>
-                  <input id="txAmount" type="number" min="0" step="0.01" placeholder="e.g. 120" />
-                </label>
-                <label>
-                  <span>Category</span>
-                  <input id="txCategory" type="text" placeholder="Food, Rent, Travel, Books..." />
-                </label>
-                <label class="span-2">
-                  <span>Note</span>
-                  <input id="txNote" type="text" placeholder="Optional" />
-                </label>
-              </div>
-              <div id="addError" class="error hidden"></div>
-              <div class="row">
-                <button id="addSubmit" class="btn btn-primary" type="button">Add</button>
-                <button id="addClear" class="btn btn-ghost" type="button">Clear</button>
-              </div>
-            </div>
-          </section>
-
-          <!-- REPORTS -->
-          <section id="reportsView" class="view hidden">
-            <div class="row between" style="margin-top: 0;">
-              <h2>Reports</h2>
-              <div class="muted small">Compare your latest periods and spot overspending quickly.</div>
-            </div>
-            <div class="grid-3">
-              <div class="card">
-                <div class="card-title">Weekly Comparison</div>
-                <div id="weeklyCmp" class="report"></div>
-              </div>
-              <div class="card">
-                <div class="card-title">Monthly Comparison</div>
-                <div id="monthlyCmp" class="report"></div>
-              </div>
-              <div class="card">
-                <div class="card-title">Yearly Comparison</div>
-                <div id="yearlyCmp" class="report"></div>
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="card">
-                <div class="card-title">Weekly Expenses (Bar)</div>
-                <canvas id="barWeekly" width="500" height="260"></canvas>
-              </div>
-              <div class="card">
-                <div class="card-title">Monthly Expenses (Bar)</div>
-                <canvas id="barMonthly" width="500" height="260"></canvas>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top: 14px;">
-              <div class="row between" style="margin-top: 0;">
-                <div class="card-title">Last Periods (Quick Table)</div>
-                <div class="muted small">Shows totals by period (income/expense/net)</div>
-              </div>
-              <div class="grid-2">
-                <div>
-                  <div class="muted small" style="margin-bottom: 8px;">Weekly (last 6)</div>
-                  <div class="table-wrap">
-                    <table class="table" aria-label="Weekly totals">
-                      <thead>
-                        <tr>
-                          <th>Week</th>
-                          <th class="right">Income</th>
-                          <th class="right">Expense</th>
-                          <th class="right">Net</th>
-                        </tr>
-                      </thead>
-                      <tbody id="weeklyTotalsBody"></tbody>
-                    </table>
-                  </div>
-                </div>
-                <div>
-                  <div class="muted small" style="margin-bottom: 8px;">Monthly (last 6)</div>
-                  <div class="table-wrap">
-                    <table class="table" aria-label="Monthly totals">
-                      <thead>
-                        <tr>
-                          <th>Month</th>
-                          <th class="right">Income</th>
-                          <th class="right">Expense</th>
-                          <th class="right">Net</th>
-                        </tr>
-                      </thead>
-                      <tbody id="monthlyTotalsBody"></tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- AI -->
-          <section id="aiView" class="view hidden">
-            <div class="row between">
-              <h2>AI Suggestions</h2>
-              <button id="aiRefresh" class="btn btn-ghost" type="button">Refresh</button>
-            </div>
-            <div class="grid-2">
-              <div class="card">
-                <div class="card-title amber">Alerts</div>
-                <ul id="aiAlerts" class="list"></ul>
-              </div>
-              <div class="card">
-                <div class="card-title green">Suggestions</div>
-                <ul id="aiSuggestions" class="list"></ul>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-title blue">Predictions</div>
-              <div id="aiForecast" class="forecast"></div>
-            </div>
-          </section>
-        </section>
-      </main>
+    <div class="card">
+      <h3>Net Balance</h3>
+      <h1>₹0</h1>
     </div>
 
-    <!-- BANK MODAL -->
-    <div id="bankModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Connect bank account">
-      <div class="modal-backdrop" id="bankCloseBackdrop"></div>
-      <div class="modal-card">
-        <div class="row between" style="margin-top:0;">
-          <div>
-            <div class="card-title">Connect Bank Account</div>
-            <div class="muted small">Demo mode (no real bank login). Use the demo account or import bank details.</div>
-          </div>
-          <div class="row" style="margin-top:0;">
-            <button id="bankDetailsToggle" class="btn btn-ghost" type="button">Import details</button>
-            <button id="bankCloseX" class="btn btn-ghost" type="button">Close</button>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:12px;">
-          <div class="row between" style="margin-top:0;">
-            <div>
-              <div class="muted small">Status</div>
-              <div id="bankStatus" style="font-weight:800;">Not connected</div>
-            </div>
-            <div class="row" style="margin-top:0;">
-              <button id="bankDisconnect" class="btn btn-ghost" type="button">Disconnect</button>
-            </div>
-          </div>
-          <div id="bankMsg" class="muted small" style="margin-top:10px;"></div>
-        </div>
-
-        <div class="grid-2" style="margin-top:12px;">
-          <div class="card">
-            <div class="card-title">Connect a Bank</div>
-            <div class="muted small" style="line-height:1.6;">
-              Choose your bank. For true live sync/login, a backend + Account Aggregator/Bank API is required.
-              For now, you can still import statements/transactions below.
-            </div>
-            <div class="bank-grid" role="list">
-              <button class="bank-tile bank-choice" role="listitem" data-bank="HDFC" type="button">
-                <img class="bank-logo" src="./assets/hdfc.webp" alt="HDFC Bank" />
-                <span class="bank-name">HDFC</span>
-              </button>
-              <button class="bank-tile bank-choice" role="listitem" data-bank="ICICI" type="button">
-                <img class="bank-logo" src="./assets/icici.webp" alt="ICICI Bank" />
-                <span class="bank-name">ICICI</span>
-              </button>
-              <button class="bank-tile bank-choice" role="listitem" data-bank="Axis" type="button">
-                <img class="bank-logo" src="./assets/axis.webp" alt="Axis Bank" />
-                <span class="bank-name">Axis</span>
-              </button>
-              <button class="bank-tile bank-choice" role="listitem" data-bank="YES Bank" type="button">
-                <img class="bank-logo" src="./assets/yesbank.png" alt="YES Bank" />
-                <span class="bank-name">YES Bank</span>
-              </button>
-            </div>
-            <div class="row">
-              <button id="bankConnectReal" class="btn btn-primary" type="button">Connect selected bank</button>
-            </div>
-            <div class="small muted" style="margin-top:8px;">
-              Live sync placeholder: stores selected bank for this user.
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-title">Connection info</div>
-            <div class="muted small" style="line-height:1.6;">
-              After connecting, you can import transactions (CSV) below to populate your dashboard.
-              For real bank sync, this UI would redirect to a secure consent/login page.
-            </div>
-          </div>
-        </div>
-
-        <div id="bankDetailsPanel" class="bank-details-panel hidden">
-          <div class="row between" style="margin-top:0;">
-            <div class="card-title">Import bank account details</div>
-            <button id="bankDetailsClose" class="btn btn-ghost" type="button">Close</button>
-          </div>
-          <div class="muted small" style="line-height:1.6; margin-top: 6px;">
-            Upload JSON or CSV to store bank details (display only).<br />
-            JSON example:
-            <span class="mono">{"bank_name":"SBI","account_holder":"Name","account_last4":"7788","ifsc":"SBIN0000123"}</span>
-          </div>
-          <div class="row" style="margin-top: 10px;">
-            <input id="bankDetailsFile" type="file" accept=".json,.csv,application/json,text/csv" />
-            <button id="bankDetailsImport" class="btn btn-primary" type="button">Import</button>
-          </div>
-          <div id="bankDetailsError" class="error hidden"></div>
-        </div>
-
-        <div class="card" style="margin-top:12px;">
-          <div class="card-title">Import Bank Transactions (CSV)</div>
-          <div class="muted small" style="line-height:1.5;">
-            CSV columns supported:
-            <b>date</b> (YYYY-MM-DD), <b>description</b>, <b>amount</b> (negative = expense, positive = income).
-            Example: <span class="mono">2026-04-01,Swiggy,-220</span>
-          </div>
-          <div class="row">
-            <input id="bankCsv" type="file" accept=".csv,text/csv" />
-            <button id="bankImport" class="btn btn-primary" type="button">Import</button>
-            <button id="bankSimulate" class="btn btn-ghost" type="button">Simulate last 30 days</button>
-          </div>
-          <div id="bankImportError" class="error hidden"></div>
-        </div>
-
-        <div class="small muted" style="margin-top:10px;">
-          Want real bank connectivity? That requires a backend + provider (Plaid/TrueLayer) and OAuth flows.
-        </div>
-      </div>
+    <div class="card">
+      <h3>Salary</h3>
+      <h1>₹0</h1>
     </div>
 
-    <script src="./app.js"></script>
-  </body>
+    <div class="card">
+      <h3>Expenses</h3>
+      <h1>₹0</h1>
+    </div>
+
+    <div class="card">
+      <h3>Recent Transactions</h3>
+      <p>No data yet</p>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button>🏠</button>
+    <button>➕</button>
+    <button>📊</button>
+    <button>🤖</button>
+  </div>
+
+</div>
+
+</body>
+
+       
 </html>
 
 
@@ -461,408 +65,73 @@ FILE: index.html
 FILE: web/styles.css
 ====================================================================================================
 
-:root{
-  --bg: #ffffff;
-  --panel: #11131a;
-  --panel2: #141827;
-  --text: rgba(15, 16, 20, 0.92);
-  --muted: rgba(30, 35, 50, 0.62);
-  --border: rgba(0,0,0,0.08);
-  --green: #3cc878;
-  --red: #dc4646;
-  --blue: #7a93ff;
-  --amber: #dcb43c;
-  --shadow: 0 12px 40px rgba(0,0,0,0.35);
-  --accentA: #8d7bff; /* violet */
-  --accentB: #4fa8ff; /* sky blue */
-  --accentC: #ff6fb7; /* soft pink */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(180deg, #0f172a, #1e293b);
+  color: white;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-  background: linear-gradient(135deg, #d9ecff 0%, #bfe3ff 35%, #9fd2ff 70%, #87c6ff 100%);
-  color: var(--text);
+/* APP WRAPPER */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
-.hidden{display:none !important}
-.muted{color:var(--muted)}
-.small{font-size: 12.5px}
-.right{text-align:right}
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: rgba(255,255,255,0.05);
+}
 
-.topbar{
-  height:72px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 0 18px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(12px);
-}
-.brand{display:flex; gap:12px; align-items:center}
-.logo{
-  width:42px; height:42px; border-radius:12px;
-  background: linear-gradient(135deg, rgba(122,147,255,0.9), rgba(60,200,120,0.85));
-  display:grid; place-items:center;
-  font-weight:800; letter-spacing:0.3px;
-}
-.title{font-weight:800}
-.subtitle{font-size:12px; color:var(--muted)}
-.topbar-right{display:flex; align-items:center; gap:12px}
-.badge{
-  padding:8px 10px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.75);
+.logo {
+  width: 45px;
+  height: 45px;
   border-radius: 12px;
-  color: var(--muted);
+  background: linear-gradient(135deg,#6366f1,#3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
-.shell{
-  height: calc(100vh - 72px);
-  display:grid;
-  grid-template-columns: 260px 1fr;
-}
-
-.sidebar{
-  border-right: 1px solid var(--border);
-  padding: 18px 14px;
-  background: rgba(233, 245, 255, 0.92);
-  backdrop-filter: blur(10px);
-  display:flex;
-  flex-direction:column;
-}
-.nav{display:flex; flex-direction:column; gap:10px}
-.nav-item{
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding: 12px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(141, 123, 255, 0.22);
-  background: #efe9ff; /* pastel lavender (different from baby blue cards) */
-  color: var(--text);
-  cursor:pointer;
-  transition: 120ms ease;
-}
-.nav-item:hover{transform: translateY(-1px); background: #e3d9ff}
-.nav-item.active{
-  background: #d9ccff;
-  border-color: rgba(141, 123, 255, 0.45);
-}
-.nav-icon{width:22px; display:inline-flex; justify-content:center}
-.sidebar-footer{margin-top:auto; padding: 12px 6px}
-.hint{font-size:12px; color: var(--muted); line-height:1.4}
-
-.content{
-  padding: 22px;
-  overflow:auto;
-  position: relative;
-  border-left: 1px solid rgba(255,255,255,0.35);
-  background:
-    radial-gradient(circle at 52% 40%,
-      rgba(255, 105, 180, 0.34) 0%,
-      rgba(156, 120, 255, 0.30) 18%,
-      rgba(80, 130, 255, 0.26) 34%,
-      rgba(110, 230, 235, 0.24) 52%,
-      rgba(255,255,255,0.18) 72%),
-    linear-gradient(135deg, rgba(217,236,255,0.92) 0%, rgba(191,227,255,0.90) 35%, rgba(159,210,255,0.90) 70%, rgba(135,198,255,0.90) 100%);
-}
-
-.view{max-width: 1100px}
-
-.home-theme{
-  position: relative;
-  isolation: isolate;
-  padding: 14px;
-  border-radius: 22px;
-  overflow: hidden;
-  background: rgba(245, 246, 248, 0.96);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-.home-glow{
-  position:absolute;
-  inset:-140px -140px auto -140px;
-  height: 720px;
-  z-index: -1;
-  background:
-    radial-gradient(circle at 50% 58%,
-      rgba(255, 105, 180, 0.65) 0%,
-      rgba(156, 120, 255, 0.60) 18%,
-      rgba(80, 130, 255, 0.55) 34%,
-      rgba(110, 230, 235, 0.50) 52%,
-      rgba(245, 246, 248, 0.0) 72%);
-  filter: blur(0.2px);
-}
-.home-theme h2{color: rgba(15, 16, 20, 0.92)}
-.home-theme .muted{color: rgba(30, 35, 50, 0.62)}
-
-.card{
-  background: #bfe3ff; /* solid baby blue */
-  border: 1px solid rgba(79, 168, 255, 0.45);
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 12px 34px rgba(79,168,255,0.16);
-}
-.card-title{font-weight:700; margin-bottom:10px}
-
-.auth-card{max-width:520px; margin: 70px auto}
-.grid{display:grid; gap:12px}
-.grid-2{display:grid; gap:14px; grid-template-columns: 1fr 1fr}
-.grid-2 > *{min-width: 0}
-.grid-3{display:grid; gap:14px; grid-template-columns: 1fr 1fr 1fr}
-.span-2{grid-column: span 2}
-
-label{display:grid; gap:6px}
-input{
-  width:100%;
-  padding: 12px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.10);
-  background: rgba(255,255,255,0.85);
-  color: var(--text);
-  outline:none;
-}
-input:focus{
-  border-color: rgba(122,147,255,0.55);
-  box-shadow: 0 0 0 3px rgba(122,147,255,0.15);
-}
-
-.row{display:flex; gap:10px; align-items:center; margin-top: 12px}
-.between{justify-content:space-between}
-
-.btn{
-  padding: 11px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(79, 168, 255, 0.45);
-  background: #bfe3ff; /* baby blue */
-  color: rgba(15, 16, 20, 0.92);
-  cursor:pointer;
-  transition: 120ms ease;
-}
-.btn:hover{
-  transform: translateY(-1px);
-  background: #a9d8ff;
-  border-color: rgba(79, 168, 255, 0.70);
-}
-.btn-primary{
-  background: #93cfff; /* slightly deeper baby blue */
-  border-color: rgba(79, 168, 255, 0.85);
-  box-shadow: 0 10px 26px rgba(79,168,255,0.22);
-}
-.btn-primary:hover{
-  background: #7dc3ff;
-}
-.btn-ghost{
-  background: #bfe3ff;
-}
-
-.error{
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(220,70,70,0.35);
-  background: rgba(220,70,70,0.10);
-  color: #ffd7d7;
-}
-
-.cards{display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0}
-.stat{padding:14px}
-.stat-label{font-size:12px; color: var(--muted); margin-bottom: 8px}
-.stat-value{font-size: 22px; font-weight:800}
-.green{color: var(--green)}
-.red{color: var(--red)}
-.blue{color: var(--blue)}
-.amber{color: var(--amber)}
-
-.table-wrap{overflow:auto; border-radius: 14px; border: 1px solid var(--border)}
-.table{
-  width:100%;
-  border-collapse: collapse;
-  background: rgba(255,255,255,0.75);
-}
-.table.tx-table{min-width: 820px;}
-.table th, .table td{
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-.table th{font-size:12px; color: var(--muted); text-align:left}
-.pill{
-  display:inline-flex; align-items:center;
-  padding: 5px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
-  font-size:12px;
-}
-.pill.income{color: var(--green)}
-.pill.expense{color: var(--red)}
-
-.seg{display:flex; gap:8px}
-.seg-btn{
-  flex:1;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
-  color: var(--text);
-  cursor:pointer;
-}
-.seg-btn.active{
-  background: rgba(141, 123, 255, 0.22);
-  border-color: rgba(141, 123, 255, 0.45);
-}
-
-/* Light Home surface overrides (buttons should match the glow background) */
-.home-theme .btn{
-  border-color: rgba(79, 168, 255, 0.45);
-  background: #bfe3ff;
-  color: rgba(15, 16, 20, 0.92);
-}
-.home-theme .btn:hover{
-  background: #a9d8ff;
-  border-color: rgba(79, 168, 255, 0.70);
-}
-.home-theme .btn-ghost{
-  background: #bfe3ff;
-}
-.home-theme .btn-primary{
-  color: rgba(15, 16, 20, 0.92);
-  border-color: rgba(79, 168, 255, 0.85);
-  box-shadow: 0 10px 26px rgba(79,168,255,0.18);
-}
-
-.legend{
-  display:flex;
-  flex-wrap:wrap;
-  gap: 8px 10px;
-  margin-top: 10px;
-}
-.legend-item{
-  display:flex; align-items:center; gap:8px;
-  font-size: 12px;
-  color: var(--muted);
-}
-.dot{
-  width:10px; height:10px; border-radius: 999px;
-  background: white;
-}
-
-.list{margin:0; padding-left: 18px}
-.list li{margin: 8px 0; color: var(--muted)}
-.forecast{color: var(--muted); line-height: 1.6}
-.report{color: var(--muted); line-height: 1.55}
-.report-grid{display:grid; gap:8px}
-.report-row{display:flex; justify-content:space-between; gap:12px}
-.report-key{color: var(--muted)}
-.report-val{color: var(--text); font-weight:700}
-.badge-mini{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
-  font-size: 12px;
-}
-.badge-mini.good{color: var(--green)}
-.badge-mini.bad{color: var(--red)}
-.badge-mini.neutral{color: var(--blue)}
-
-canvas{
-  width:100%;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.78);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-
-.mono{
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-.modal{
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  z-index: 50;
-}
-.modal-backdrop{
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(6px);
-}
-.modal-card{
-  position: relative;
-  width: min(820px, calc(100vw - 22px));
-  max-height: calc(100vh - 22px);
-  overflow: auto;
-  border-radius: 18px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(20,24,39,0.92), rgba(17,19,26,0.92));
-  box-shadow: 0 24px 80px rgba(0,0,0,0.55);
-  padding: 16px;
-}
-
-.bank-grid{
-  margin-top: 10px;
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.bank-tile{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: var(--text);
-  cursor: pointer;
-  transition: 120ms ease;
-}
-.bank-tile:hover{
-  transform: translateY(-1px);
-  background: rgba(255,255,255,0.06);
-}
-.bank-tile.active{
-  background: rgba(141, 123, 255, 0.20);
-  border-color: rgba(141, 123, 255, 0.40);
-}
-.bank-logo{
-  width: 46px;
-  height: 28px;
-  object-fit: contain;
-  background: rgba(255,255,255,0.92);
-  border-radius: 10px;
-  padding: 4px;
-}
-.bank-name{font-weight:800; letter-spacing:0.2px}
-
-.bank-details-panel{
-  position: sticky;
-  bottom: 12px;
-  margin-top: 12px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.22);
+/* CONTENT */
+.content {
+  flex: 1;
+  overflow-y: auto;
   padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-@media (max-width: 980px){
-  .shell{grid-template-columns: 220px 1fr}
-  .sidebar{display:flex}
-  .cards{grid-template-columns: 1fr 1fr}
-  .grid-2{grid-template-columns: 1fr}
-  .grid-3{grid-template-columns: 1fr}
+/* CARDS */
+.card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
 }
 
+/* BOTTOM NAV */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.bottom-nav button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+}
 
 
 ====================================================================================================
